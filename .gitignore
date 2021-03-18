@@ -10,7 +10,7 @@
 .env.*.local
 jsconfig.json
 vetur.config.js
-/backend/app/*.db
+/backend/app/smc.db
 # Log files
 ./frontend/npm-debug.log*
 ./frontend/yarn-debug.log*

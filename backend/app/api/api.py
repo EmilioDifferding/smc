@@ -37,7 +37,7 @@ def place(id):
         db.session.commit()
         return jsonify ({'msg': 'success'}), 201
     elif request.method == 'DELETE':
-        place = place.query.get(id)
+        place = Place.query.get(id)
         db.session.delete(place)
         db.session.commit()
         return jsonify ({'msg': 'success'}), 200
