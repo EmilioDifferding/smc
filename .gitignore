@@ -8,7 +8,9 @@
 # local env files
 .env.local
 .env.*.local
-
+jsconfig.json
+vetur.config.js
+/backend/app/*.db
 # Log files
 ./frontend/npm-debug.log*
 ./frontend/yarn-debug.log*
@@ -23,5 +25,4 @@
 *.njsproj
 *.sln
 *.sw?
-jsconfig.json
-vetur.config.js
+
