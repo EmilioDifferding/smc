@@ -106,6 +106,7 @@ export default {
 
       form:{},
       aliases:[],
+      deletedItems:[],
       places:[],
       selectedPlace:null,
       units:[],
@@ -129,7 +130,17 @@ export default {
       this.form.aliases=this.aliases;
     },
     deleteItem(item){
-      this.aliases = this.aliases.filter( i => i.alias !== item);
+      this.aliases = this.aliases.filter( i => {
+        if (i.alias !== item){
+          return true
+        }
+          if(i.id){
+            this.deletedItems.push(i)
+            this.form.deletedItems = this.deletedItems
+          }
+        return false
+          
+        });
       this.form.aliases = this.aliases
       console.log("DELETED", item)
     },
