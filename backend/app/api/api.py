@@ -150,7 +150,7 @@ def device(id):
 @api.route('/devices/<int:device_id>/data', methods=['GET'])
 def dump_data(device_id):
     measurements = Measurement.query.filter_by(device_id=device_id).all()
-    return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name})
+    return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None})
 
 ###############################
 # API section only for devices#
