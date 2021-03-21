@@ -13,7 +13,7 @@ api = Blueprint('api', __name__)
 @api.route('/places', methods=['GET', 'POST'])
 def places():
     if request.method == 'GET':
-        places = Place.query.all()
+        places = Place.query.all() 
         return jsonify({ 'places':[p.to_dict() for p in places] })
     
     elif request.method == 'POST':
