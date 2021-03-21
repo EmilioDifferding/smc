@@ -107,9 +107,8 @@ def devices():
 # solo para pruebas por el momento.
 def filter_set(aliases, search_string):
     def iterator_func(x):
-        for v in x.values():
-            if search_string in v:
-                return False
+        if search_string == x.id:
+            return False
         return True
     return filter(iterator_func, aliases)
 
@@ -121,18 +120,21 @@ def device(id):
         device.name = data['name']
         device.unic_id = data['unic_id']
         device.place_id = data['place']
-
-        for alias in device.aliases:
-            db.session.delete(alias)     
+        
+        if 'deletedItems' in data:
+            for alias in data['deletedItems']:
+                alias_to_delete = Alias.query.get(alias['id'])
+                db.session.delete(alias_to_delete)
 
         for alias in data['aliases']:
-            new_alias = Alias(
-                name=alias['alias'],
-                unit_id=alias['unit']['id'] if ('id' in alias['unit']) else alias['unit_id'],
-                max_limit=alias['max_limit'], 
-                min_limit=alias['min_limit']
-                )
-            device.aliases.append(new_alias)            
+            if not 'id' in alias:
+                new_alias = Alias(
+                    name=alias['alias'],
+                    unit_id=alias['unit']['id'] if ('id' in alias['unit']) else alias['unit_id'],
+                    max_limit=alias['max_limit'], 
+                    min_limit=alias['min_limit']
+                    )
+                device.aliases.append(new_alias)            
         db.session.commit()
         return jsonify({'msg':'success'}), 200
     
