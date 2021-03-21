@@ -23,45 +23,43 @@ const devicesApi = apiFactory.get("devices");
 export default {
   components: {
     PortletBase,
-    DeviceForm,
+    DeviceForm
   },
   data() {
     return {
-      device: null,
+      device: null
     };
   },
   methods: {
     async getResource() {
-        try {
+      try {
         const data = await devicesApi.find(this.$route.params.id);
         this.device = data;
       } catch (error) {
         console.log("error");
       }
     },
-    async onSubmit(){
-        try {
+    async onSubmit() {
+      try {
         let formData = this.$refs.form.form;
-        console.log(this.$refs.form.form);
-        console.log(await devicesApi.update(this.$route.params.id, formData))
         await devicesApi.update(this.$route.params.id, formData);
         this.$buefy.toast.open({
           message: `Operación Realizada`,
-          type: "is-success",
+          type: "is-success"
         });
         this.$router.push({ name: "devices" });
       } catch (error) {
-        console.log(error)
+        console.log(error);
         this.$buefy.toast.open({
           message: `Algo salio mal ${error}`,
-          type: "is-danger",
+          type: "is-danger"
         });
       }
     }
   },
   created() {
     this.getResource();
-  },
+  }
 };
 </script>
 
