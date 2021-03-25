@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // const API_URL = 'http://smc-fcal.duckdns.org/';
-const API_URL = 'http://localhost:5000/api/'
+// const API_URL = 'http://localhost:5000/api/'
+const API_URL = process.env.VUE_APP_API_URL
 const client = axios.create({
     baseURL: API_URL,
 });

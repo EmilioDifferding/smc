@@ -6,14 +6,6 @@ Vue.use(VueRouter)
 
 
 import routes from './routes'
-// const routes = [
-//   {
-//     path: '/',
-//     name: 'Home',
-//     component: Home
-//   },
-  
-// ]
 
 const router = new VueRouter({
   mode: 'history',
