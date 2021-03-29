@@ -167,7 +167,7 @@ def store_data():
             alias = Alias.query.filter_by(name=value['alias']).filter_by(device_id=device.id).first()
             if alias is not None:
                 value_to_add = Value(
-                    value=value['value'],
+                    value=float(value['value']),
                     alias=alias,
                 )
                 new_measurement.values.append(value_to_add)
