@@ -7,8 +7,15 @@ api.py
 from flask import Blueprint, jsonify, request
 
 from .models import db, Alias, Device, Place, Measurement, Unit, Value
-
 api = Blueprint('api', __name__)
+
+import telegram
+global chat_id
+global bot
+chat_id=75150392
+
+bot = telegram.Bot(token="1647818581:AAFJfBJGkDceIIPJbg16FKjKNl0gGUZHBkw")
+
 
 @api.route('/places', methods=['GET', 'POST'])
 def places(): 
@@ -171,6 +178,9 @@ def store_data():
                     alias=alias,
                 )
                 new_measurement.values.append(value_to_add)
+                if value_to_add.value <= alias.min_limit or value_to_add.value >= alias.max_limit:
+                    message = 'Algo está mal con {}, {} está fuera de rango, Valor actual: {}'.format(alias.device.name, alias.name, value_to_add.value)
+                    bot.send_message(chat_id=chat_id, text=message)
         db.session.commit()
         response = {
             "msg": "Data was stored",
