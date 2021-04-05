@@ -88,19 +88,29 @@ export default {
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
-        console.log(error);
+        this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger",
+        });
       }
     },
     async onDelete(id) {
       this.$buefy.dialog.confirm({
         message: `Seguro que quiere borrar este elemento?`,
         onConfirm: async () => {
-          await unitsApi.delete(id);
-          this.fetchTableData();
-          this.$buefy.toast.open({
-            message: "Se eliminó correctamente",
-            type: "is-success",
-          });
+          try {
+            await unitsApi.delete(id);
+            this.fetchTableData();
+            this.$buefy.toast.open({
+              message: "Se eliminó correctamente",
+              type: "is-success",
+            });
+          } catch (error) {
+            this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger",
+        });
+          }
         },
       });
     },

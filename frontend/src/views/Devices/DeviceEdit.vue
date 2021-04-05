@@ -36,7 +36,10 @@ export default {
         const data = await devicesApi.find(this.$route.params.id);
         this.device = data;
       } catch (error) {
-        console.log("error");
+        this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger",
+        });
       }
     },
     async onSubmit() {

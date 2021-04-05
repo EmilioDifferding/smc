@@ -38,7 +38,7 @@ export default {
         this.$router.push({ name: "devices" });
       } catch (error) {
         this.$buefy.toast.open({
-          message: `Algo salio mal ${error}`,
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
           type: "is-danger",
         });
       }

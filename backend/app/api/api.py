@@ -157,7 +157,13 @@ def device(id):
 @api.route('/devices/<int:device_id>/data', methods=['GET'])
 def dump_data(device_id):
     measurements = Measurement.query.filter_by(device_id=device_id).all()
-    return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None})
+    print(measurements)
+    if measurements is not None:
+        return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None}), 200
+    return jsonify({
+        'measurements': []
+        'name':''
+    })
 
 ###############################
 # API section only for devices#
@@ -178,8 +184,12 @@ def store_data():
                     alias=alias,
                 )
                 new_measurement.values.append(value_to_add)
-                if value_to_add.value <= alias.min_limit or value_to_add.value >= alias.max_limit:
-                    message = 'Algo está mal con {}, {} está fuera de rango, Valor actual: {}'.format(alias.device.name, alias.name, value_to_add.value)
+                message=''
+                if alias.min_limit and value_to_add.value <= alias.min_limit:
+                    message = 'Algo está mal con {d}, {a} está por debajo del valor establecido ({ml}), Valor actual: {v}'.format(d=alias.device.name,ml=alias.min_limit, a=alias.name, v=value_to_add.value)
+                if alias.max_limit and value_to_add.value >= alias.max_limit:
+                    message = 'Algo está mal con {d}, {a} está por encima del valor establecido ({ml}), Valor actual: {v}'.format(d=alias.device.name,ml=alias.max_limit, a=alias.name, v=value_to_add.value)
+                if message:
                     bot.send_message(chat_id=chat_id, text=message)
         db.session.commit()
         response = {

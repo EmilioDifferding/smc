@@ -18,7 +18,7 @@ const successHandler = (response) => {
 };
 
 const errorHandler = (error) =>{
-    console.error(error);
+    console.log(error);
     let messageData = Object.create(null);
     messageData.title = 'Ocurrió un error en la solicitud';
     messageData.content = '';
