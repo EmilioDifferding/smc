@@ -16,7 +16,7 @@ global chat_id
 global bot
 chat_id=75150392
 
-bot = telegram.Bot(token="1647818581:AAFJfBJGkDceIIPJbg16FKjKNl0gGUZHBkw")
+bot = telegram.Bot(token="1647818581:AAGzhsza7cUAfEtv-yAyqT2XLeqjo2hz8LQ")
 
 def token_required(f):
     @wraps(f)
@@ -263,9 +263,11 @@ def store_data():
                 )
                 new_measurement.values.append(value_to_add)
                 message=''
-                if alias.min_limit and value_to_add.value <= alias.min_limit:
+                print('VALORRRR: {}'.format(alias.min_limit) )
+                print('VALOR LEIDO {}'.format(type(value_to_add.value)))
+                if alias.min_limit is not False and value_to_add.value <= alias.min_limit:
                     message = 'Algo está mal con {d}, {a} está por debajo del valor establecido ({ml}), Valor actual: {v}'.format(d=alias.device.name,ml=alias.min_limit, a=alias.name, v=value_to_add.value)
-                if alias.max_limit and value_to_add.value >= alias.max_limit:
+                if alias.max_limit is not False and value_to_add.value >= alias.max_limit:
                     message = 'Algo está mal con {d}, {a} está por encima del valor establecido ({ml}), Valor actual: {v}'.format(d=alias.device.name,ml=alias.max_limit, a=alias.name, v=value_to_add.value)
                 if message:
                     bot.send_message(chat_id=chat_id, text=message)
