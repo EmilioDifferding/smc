@@ -79,7 +79,7 @@ export default {
     async fetchTableData() {
       this.isLoading = true;
       try {
-        const data = await placesApi.get();
+        const data = await placesApi.get(localStorage.getItem('token'));
         this.places = data["places"];
         this.isLoading = false;
       } catch (error) {

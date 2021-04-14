@@ -3,11 +3,11 @@ import api from '../api'
 const resource = '/places';
 
 export default {
-    get(params){
-        params = {
-            'params': params,
-        };
-        return api.get(`${resource}`,params)
+    get(){
+        // params = {
+        //     'params': params,
+        // };
+        return api.get(`${resource}`)
     },
     find (id, params) {
         params = {

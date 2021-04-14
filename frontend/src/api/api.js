@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 // const API_URL = 'http://smc-fcal.duckdns.org/';
 // const API_URL = 'http://localhost:5000/api/'
 const API_URL = process.env.VUE_APP_API_URL
@@ -8,12 +7,14 @@ const client = axios.create({
 });
 
 client.defaults.headers.common['X-Requeted-With'] = 'XMLHttpRequest';
+client.defaults.headers.common['Authorization'] = `Bearer: ${localStorage.getItem('token')}`
 
 const configHandler = (config) => {
     return config;
 };
 
 const successHandler = (response) => {
+    console.log(client.defaults.headers.common['Authorization'])
     return response.data;
 };
 
@@ -38,10 +39,9 @@ const errorHandler = (error) =>{
     }
     return Promise.reject(messageData)
 }
-
 client.interceptors.request.use(
     config => configHandler(config),
-    error => console.log(error)
+    error => console.log(error)    
 );
 
 client.interceptors.response.use(

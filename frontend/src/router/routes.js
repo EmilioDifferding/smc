@@ -13,22 +13,50 @@ import UnitsIndex from '../views/Units/UnitsIndex'
 import UnitsList from '../views/Units/UnitsList'
 import UnitsCreate from '../views/Units/UnitsCreate'
 import UnitsEdit from '../views/Units/UnitsEdit'
+import UsersIndex from '../views/Users/UsersIndex'
+import UsersList from '../views/Users/UsersList'
+import UsersCreate from '../views/Users/UsersCreate'
+import UsersEdit from '../views/Users/UsersEdit'
+import Login from '../views/Login'
 
+import store from '@/store'
 
 export default [
-    {
+    {   
+        
         path: '/',
-        name: 'Home',
+        name: 'dashboard',
         component: Dashboard,
+        beforeEnter (to, from, next) {
+            if (!store.getters.isAuthenticated) {
+                console.log(' NO AUTENTICADO')
+                next('/login')
+            } else {
+              next()
+            }
+          },
         children: [
-
             {
-                path: '/about',
-                name: 'About',
-                // route level code-splitting
-                // this generates a separate chunk (about.[hash].js) for this route
-                // which is lazy-loaded when the route is visited.
-                component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+                path: '/usuarios',
+                title: 'Usuarios',
+                component: UsersIndex,
+                children:[
+                    {
+                        path:'',
+                        name:'users',
+                        component: UsersList
+                    },
+                    {
+                        path: 'crear',
+                        name: 'users.create',
+                        component: UsersCreate
+                    },
+                    {
+                        path: ':id/editar',
+                        name: 'users.edit',
+                        component: UsersEdit
+                    }
+                ]
             },
             {
                 path: '/dispositivos',
@@ -101,5 +129,13 @@ export default [
                 ]
             }
         ]
+    },
+    {
+        path: '/login',
+        name: 'Login',
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: Login
     },
 ]

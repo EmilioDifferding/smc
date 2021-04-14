@@ -41,6 +41,7 @@
 
 <script>
 export default {
+  name:'Dashboard',
   data() {
     return {
       expanOnHover: false,
@@ -53,6 +54,12 @@ export default {
           name:'Dispositivos',
           icon: 'memory',
           to: {name: 'devices'},
+          tag: 'router-link'
+        },
+        {
+          name: 'Usuarios',
+          icon: 'account',
+          to: {name: 'users'},
           tag: 'router-link'
         },
         {

@@ -3,11 +3,11 @@
 </template>
 
 <script>
-import UnitsList from './UnitsList'
+import UsersList from './UsersList'
 export default {
-    name: 'UnitsIndex',
-    components:{
-        UnitsList
+    name: 'UsersIndex',
+    components: {
+        UsersList,
     }
 }
 </script>

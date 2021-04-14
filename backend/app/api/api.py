@@ -4,9 +4,11 @@ api.py
   REST requests and responses
 """
 
-from flask import Blueprint, jsonify, request
-
-from .models import db, Alias, Device, Place, Measurement, Unit, Value
+from flask import Blueprint, jsonify, request, current_app
+from functools import wraps
+import jwt
+from datetime import datetime, timedelta
+from .models import db, Alias, Device, Place, Measurement, Unit, Value, User
 api = Blueprint('api', __name__)
 
 import telegram
@@ -16,9 +18,42 @@ chat_id=75150392
 
 bot = telegram.Bot(token="1647818581:AAFJfBJGkDceIIPJbg16FKjKNl0gGUZHBkw")
 
+def token_required(f):
+    @wraps(f)
+    def _verify (*args, **kwargs):
+        auth_headers = request.headers.get('Authorization', '').split()
+
+        invalid_msg = {
+            'msg': 'Necesita iniciar sesión para acceder al contenido',
+            'authenticated': False
+        }
+        expired_msg = {
+            'msg': 'Su sesión ha caducado, vuelva a hacer login',
+            'authenticated': False
+        }
+
+        if len(auth_headers) != 2:
+            return jsonify(invalid_msg), 401
+        
+        try:
+            token = auth_headers[1]
+            data = jwt.decode(token, current_app.config['SECRET_KEY'],algorithms="HS256")
+            user = User.query.filter_by(email=data['sub']).first()
+            if not user:
+                raise RuntimeError('User not found')
+            return f(user, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify(expired_msg), 401 
+        except (jwt.InvalidTokenError, Exception) as e:
+            print(e)
+            return jsonify(invalid_msg), 401
+    
+    return _verify
+
 
 @api.route('/places', methods=['GET', 'POST'])
-def places(): 
+@token_required
+def places(token): 
     if request.method == 'GET':
         places = Place.query.all() 
         return jsonify({ 'places':[p.to_dict() for p in places] })
@@ -32,7 +67,8 @@ def places():
 
 
 @api.route('/places/<int:id>', methods=('GET', 'PUT', 'DELETE'))
-def place(id):
+@token_required
+def place(token,id):
     if request.method == 'GET':
         place = Place.query.filter_by(id=id).first_or_404()
         return jsonify(place.to_dict())
@@ -50,7 +86,8 @@ def place(id):
         return jsonify ({'msg': 'success'}), 200
     
 @api.route('/units', methods=['GET', 'POST'])
-def units():
+@token_required
+def units(token):
     if request.method == 'GET':
         units = Unit.query.all()
         return jsonify({'units':[u.to_dict() for u in units]})
@@ -65,7 +102,8 @@ def units():
         return jsonify ({'msg': 'success'}), 201
 
 @api.route('/units/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-def unit(id):
+@token_required
+def unit(token,id):
     unit = Unit.query.filter_by(id=id).first_or_404()
     
     if request.method == 'PUT':
@@ -82,7 +120,8 @@ def unit(id):
         return jsonify(unit.to_dict())
 
 @api.route('/devices', methods=['GET', 'POST'])
-def devices():
+@token_required
+def devices(token):
     if request.method == 'POST':
         data = request.get_json()
         print(data)
@@ -120,7 +159,8 @@ def filter_set(aliases, search_string):
     return filter(iterator_func, aliases)
 
 @api.route('/devices/<int:id>', methods=['GET','PUT','DELETE'])
-def device(id):
+@token_required
+def device(token,id):
     device = Device.query.filter_by(id=id).first()
     if request.method == 'PUT':
         data = request.get_json()
@@ -155,16 +195,54 @@ def device(id):
     return jsonify(device.to_dict())
 
 @api.route('/devices/<int:device_id>/data', methods=['GET'])
-def dump_data(device_id):
+@token_required
+def dump_data(token,device_id):
     measurements = Measurement.query.filter_by(device_id=device_id).all()
     print(measurements)
     if measurements is not None:
         return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None}), 200
     return jsonify({
-        'measurements': []
-        'name':''
+        'measurements': [],
+        'name': None
     })
 
+@api.route('/users', methods=['GET','POST'])
+@token_required
+def users(token):
+    if request.method == 'POST':
+        data = request.get_json()
+        user = User.query.filter_by(email=data['email']).first()
+        if user is not None:
+            return jsonify({
+                'error': True,
+                'msg': 'Ya se ha registrado un usuario con este correo.'
+            })
+        else:
+            new_user = User(**data)
+            db.session.add(new_user)
+            db.session.commit()
+            return jsonify(new_user.to_dict()), 201
+    
+    users = User.query.all()
+    return jsonify({'users':[user.to_dict() for user in users]})
+
+@api.route('/login',methods=['POST'])
+def login():
+    data = request.get_json()
+    user = User.authenticate(**data)
+
+    if not user:
+        return jsonify({
+            'msg': 'Las credenciales no son válidas',
+            'error':True,
+            'authenticated':False
+        }), 401
+    token = jwt.encode({
+        'sub':user.email,
+        'iat': datetime.utcnow(),
+        'exp': datetime.utcnow() + timedelta(minutes=30)},
+        current_app.config['SECRET_KEY'])
+    return jsonify({ 'token': token })
 ###############################
 # API section only for devices#
 ###############################
