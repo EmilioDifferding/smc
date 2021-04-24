@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 import { apiFactory } from '@/api/apiFactory'
 import { isValidJwt, EventBus } from '@/utils'
+import axios from 'axios'
 
 const usersApi = apiFactory.get('users')
 export default new Vuex.Store({
@@ -12,7 +13,7 @@ export default new Vuex.Store({
     users: [],
     isLoading: false,
     user: {},
-    jwt: '',
+    jwt: localStorage.getItem('token') || '',
   },
   mutations: {
     setUsers(state, payload){
@@ -30,7 +31,7 @@ export default new Vuex.Store({
     setJwtToken(state, payload){
       console.log('setJwtToken payload = ', payload)
       localStorage.token = payload.jwt.token
-      state.jwt = payload.jwt
+      state.jwt = payload.jwt.token
       }
   },
   actions: {

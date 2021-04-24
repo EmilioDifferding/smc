@@ -27,19 +27,14 @@ export default [
         path: '/',
         name: 'dashboard',
         component: Dashboard,
-        beforeEnter (to, from, next) {
-            if (!store.getters.isAuthenticated) {
-                console.log(' NO AUTENTICADO')
-                next('/login')
-            } else {
-              next()
-            }
-          },
         children: [
             {
                 path: '/usuarios',
                 title: 'Usuarios',
                 component: UsersIndex,
+                meta:{
+                    requiresAuth: true
+                },
                 children:[
                     {
                         path:'',
@@ -62,6 +57,9 @@ export default [
                 path: '/dispositivos',
                 title: 'Dispositivos',
                 component: DeviceIndex,
+                meta:{
+                    requiresAuth: true
+                },
                 children: [
                     {
                         path: '',
@@ -88,6 +86,9 @@ export default [
             {
                 path: '/lugares',
                 component: PlacesIndex,
+                meta:{
+                    requiresAuth: true
+                },
                 children: [
                     {
                         path: '',
@@ -110,6 +111,9 @@ export default [
                 path: '/units',
                 title: "Units",
                 component: UnitsIndex,
+                meta:{
+                    requiresAuth: true
+                },
                 children: [
                     {
                         path: '',
@@ -133,9 +137,6 @@ export default [
     {
         path: '/login',
         name: 'Login',
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
         component: Login
     },
 ]
