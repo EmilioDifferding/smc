@@ -31,5 +31,8 @@ export default {
 
     authenticate(data){
         return api.post(`/login`, data);
+    },
+    showme(){
+        return api.get(`/showme`);
     }
 }

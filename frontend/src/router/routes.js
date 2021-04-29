@@ -22,6 +22,11 @@ import Login from '../views/Login'
 import store from '@/store'
 
 export default [
+    {
+        path: '/login',
+        name: 'Login',
+        component: Login
+    },
     {   
         
         path: '/',
@@ -134,9 +139,5 @@ export default [
             }
         ]
     },
-    {
-        path: '/login',
-        name: 'Login',
-        component: Login
-    },
+    
 ]

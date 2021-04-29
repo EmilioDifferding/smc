@@ -30,6 +30,9 @@
 import { mapState } from 'vuex'
 import PortletBase from "../../components/portlets/PortletBase";
 import CreateButton from "../../components/buttons/CreateButton";
+import { apiFactory } from '../../api/apiFactory';
+import users from '../../api/apis/users';
+const usersApi = apiFactory.get('users');
 export default {
   name: "UsersList",
   components: {
@@ -38,16 +41,28 @@ export default {
   },
   data(){
       return {
-        //   isLoading: false,
+        isLoading: false,
+        users: [],
       }
   },
-  computed: mapState({
-          users: state => state.users,
-          isLoading: state =>state.isLoading,
-    }),
-    beforeMount(){
-        this.$store.dispatch('loadUsers')
+  methods: {
+    async fetchUsers(){
+      this.isLoading = true;
+      try {
+        let users = await  usersApi.get() ;
+        this.users = users.users;
+        this.isLoading = false;
+        
+      } catch (error) {
+        console.log(error);
+        this.isLoading = false;
+      }
+
     }
+  },
+  mounted(){
+    this.fetchUsers()
+  }
 
 };
 </script>

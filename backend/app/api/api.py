@@ -53,7 +53,7 @@ def token_required(f):
 
 @api.route('/places', methods=['GET', 'POST'])
 @token_required
-def places(token): 
+def places(current_user): 
     if request.method == 'GET':
         places = Place.query.all() 
         return jsonify({ 'places':[p.to_dict() for p in places] })
@@ -68,7 +68,7 @@ def places(token):
 
 @api.route('/places/<int:id>', methods=('GET', 'PUT', 'DELETE'))
 @token_required
-def place(token,id):
+def place(current_user,id):
     if request.method == 'GET':
         place = Place.query.filter_by(id=id).first_or_404()
         return jsonify(place.to_dict())
@@ -87,7 +87,7 @@ def place(token,id):
     
 @api.route('/units', methods=['GET', 'POST'])
 @token_required
-def units(token):
+def units(current_user):
     if request.method == 'GET':
         units = Unit.query.all()
         return jsonify({'units':[u.to_dict() for u in units]})
@@ -103,7 +103,7 @@ def units(token):
 
 @api.route('/units/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @token_required
-def unit(token,id):
+def unit(current_user,id):
     unit = Unit.query.filter_by(id=id).first_or_404()
     
     if request.method == 'PUT':
@@ -121,7 +121,7 @@ def unit(token,id):
 
 @api.route('/devices', methods=['GET', 'POST'])
 @token_required
-def devices(token):
+def devices(current_user):
     if request.method == 'POST':
         data = request.get_json()
         print(data)
@@ -160,7 +160,7 @@ def filter_set(aliases, search_string):
 
 @api.route('/devices/<int:id>', methods=['GET','PUT','DELETE'])
 @token_required
-def device(token,id):
+def device(current_user,id):
     device = Device.query.filter_by(id=id).first()
     if request.method == 'PUT':
         data = request.get_json()
@@ -196,7 +196,7 @@ def device(token,id):
 
 @api.route('/devices/<int:device_id>/data', methods=['GET'])
 @token_required
-def dump_data(token,device_id):
+def dump_data(current_user,device_id):
     measurements = Measurement.query.filter_by(device_id=device_id).all()
     print(measurements)
     if measurements is not None:
@@ -208,7 +208,7 @@ def dump_data(token,device_id):
 
 @api.route('/users', methods=['GET','POST'])
 @token_required
-def users(token):
+def users(current_user):
     if request.method == 'POST':
         data = request.get_json()
         user = User.query.filter_by(email=data['email']).first()
@@ -242,7 +242,19 @@ def login():
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(minutes=30)},
         current_app.config['SECRET_KEY'])
-    return jsonify({ 'token': token })
+    json = { 
+        'token': token,
+        'user': user.to_dict(),
+         }
+    print(json)
+    return jsonify(json)
+
+@api.route('/showme', methods=['GET'])
+@token_required
+def me(current_user):
+    print(current_user.to_dict())
+    return jsonify(current_user.to_dict()),200
+
 ###############################
 # API section only for devices#
 ###############################

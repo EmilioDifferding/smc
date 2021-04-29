@@ -17,12 +17,15 @@ const router = new VueRouter({
 })
 router.beforeEach ((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-      if (store.getters.isAuthenticated) {
-          console.log('AUTENTICADO')
-          next()
-          return
+      if (!store.getters['auth/isAuthenticated'] && to.name !== 'Login') {
+        next({
+          name: 'Login',
+          params: { nextUrl: to.fullPath }
+        });
+      } else {
+        next();
       }
-      next('/login')
+      
   }else{
       next()
   }
