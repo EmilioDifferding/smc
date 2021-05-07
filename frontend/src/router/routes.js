@@ -32,14 +32,17 @@ export default [
         path: '/',
         name: 'dashboard',
         component: Dashboard,
+        meta:{
+            requiresAuth: true
+        },
         children: [
             {
                 path: '/usuarios',
                 title: 'Usuarios',
                 component: UsersIndex,
-                meta:{
-                    requiresAuth: true
-                },
+                // meta:{
+                //     requiresAuth: true
+                // },
                 children:[
                     {
                         path:'',
@@ -62,9 +65,9 @@ export default [
                 path: '/dispositivos',
                 title: 'Dispositivos',
                 component: DeviceIndex,
-                meta:{
-                    requiresAuth: true
-                },
+                // meta:{
+                //     requiresAuth: true
+                // },
                 children: [
                     {
                         path: '',
@@ -91,9 +94,9 @@ export default [
             {
                 path: '/lugares',
                 component: PlacesIndex,
-                meta:{
-                    requiresAuth: true
-                },
+                // meta:{
+                //     requiresAuth: true
+                // },
                 children: [
                     {
                         path: '',
@@ -116,9 +119,9 @@ export default [
                 path: '/units',
                 title: "Units",
                 component: UnitsIndex,
-                meta:{
-                    requiresAuth: true
-                },
+                // meta:{
+                //     requiresAuth: true
+                // },
                 children: [
                     {
                         path: '',

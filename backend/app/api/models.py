@@ -77,7 +77,7 @@ class Alias(db.Model):
 class Measurement(db.Model):
     __tablename__ = 'measurements'
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime(), default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime(), default=datetime.now)
     values = db.relationship('Value', backref='measurement',lazy='dynamic')
     device_id = db.Column(db.Integer, db.ForeignKey('devices.id'))
     

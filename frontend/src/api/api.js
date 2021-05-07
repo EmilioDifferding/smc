@@ -7,9 +7,16 @@ const client = axios.create({
 });
 
 client.defaults.headers.common['X-Requeted-With'] = 'XMLHttpRequest';
-let token = localStorage.getItem('token')
-if (token) {
-    client.defaults.headers.common['Authorization'] = `Bearer: ${token}`
+client.defaults.headers.common['Authorization'] = `Bearer: ${authHeader()}`
+
+function authHeader(){
+    console.log('autheader called')
+    if (localStorage.getItem('token')) {
+        return localStorage.getItem('token')
+    }
+    else{
+        return ''
+    }
 }
 
 const configHandler = (config) => {

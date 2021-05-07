@@ -45,25 +45,13 @@ export default {
     async onSubmit(){
       try{
         await this.signIn(this.formData)
-        .then(()=>this.$router.replace({name:'devices'}))
+        await this.$router.replace({name:'devices'})
       }catch(error){
-        console.log(error)
+        console.error(error)
       }
     }
   },
-  
-  // mounted () {
-  //   EventBus.$on('failedRegistering', (msg) => {
-  //     this.errorMsg = msg
-  //   })
-  //   EventBus.$on('failedAuthentication', (msg) => {
-  //     this.errorMsg = msg
-  //   })
-  // },
-  // beforeDestroy () {
-  //   EventBus.$off('failedRegistering')
-  //   EventBus.$off('failedAuthentication')
-  // }
+
 }
 </script>
 

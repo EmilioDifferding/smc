@@ -12,6 +12,18 @@
             <div class="block">
               <h1 class="title">SMC FCAL</h1>
             </div>
+            <div class="container">
+
+              <div class="level">
+                <div class="level-left">
+                  <h3 class="subtitle is-inline-flex"> <b-icon icon="account"></b-icon>  {{user.name}}</h3>
+                </div>
+                <div class="level-right">
+                  <a class="p-1" @click="onLogout"><b-icon icon="logout"></b-icon></a>
+                </div>
+              </div>
+            </div>
+            <hr>
             <b-menu class="is-custom-mobile" :activable="false">
               <b-menu-list>
                 <b-menu-item
@@ -40,6 +52,7 @@
 </template>
 
 <script>
+import {mapGetters, mapActions} from 'vuex'
 export default {
   name:'Dashboard',
   data() {
@@ -78,6 +91,18 @@ export default {
       ]
     };
   },
+  methods:{
+    ...mapActions({logout:'auth/logout'}),
+    onLogout(){
+      this.logout;
+      this.$router.replace({name:'Login'})
+    }
+  },
+  computed:{
+    ...mapGetters({
+      user: 'auth/user'
+    })
+  }
 };
 </script>
 

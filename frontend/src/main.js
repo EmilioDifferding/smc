@@ -8,12 +8,8 @@ import 'buefy/dist/buefy.css'
 
 Vue.use(Buefy)
 Vue.config.productionTip = false
-
-store.dispatch('auth/me').then(()=>{
-  new Vue({
-    router,
-    store,
-    render: h => h(App)
-  }).$mount('#app')
-
-})
+new Vue({
+  router,
+  store,
+  render: h => h(App)
+}).$mount('#app')
