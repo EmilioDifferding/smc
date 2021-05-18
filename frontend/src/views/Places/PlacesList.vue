@@ -53,38 +53,41 @@ export default {
   name: "PlacesList",
   components: {
     CreateButton,
-    PortletBase,
+    PortletBase
   },
   computed: {
     table() {
       return {
-        rows: this.places.map((obj) => {
+        rows: this.places.map(obj => {
           let props = this.$router.resolve({
             name: "places.edit",
-            params: { id: obj.id },
+            params: { id: obj.id }
           });
           obj.to = props;
           return obj;
-        }),
+        })
       };
-    },
+    }
   },
   data() {
     return {
       isLoading: false,
-      places: [],
+      places: []
     };
   },
   methods: {
     async fetchTableData() {
       this.isLoading = true;
       try {
-        const data = await placesApi.get();
+        const data = await placesApi.get(localStorage.getItem('token'));
         this.places = data["places"];
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
-        console.log(error);
+        this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger"
+        });
       }
     },
 
@@ -92,19 +95,26 @@ export default {
       this.$buefy.dialog.confirm({
         message: `Seguro que quiere borrar este elemento?`,
         onConfirm: async () => {
-          await placesApi.delete(id);
-          this.fetchTableData();
-          this.$buefy.toast.open({
-            message: "Se eliminó correctamente",
-            type: "is-success",
-          });
-        },
+          try {
+            await placesApi.delete(id);
+            this.fetchTableData();
+            this.$buefy.toast.open({
+              message: "Se eliminó correctamente",
+              type: "is-success"
+            });
+          } catch (error) {
+            this.$buefy.toast.open({
+              message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+              type: "is-danger"
+            });
+          }
+        }
       });
-    },
+    }
   },
   mounted() {
     this.fetchTableData();
-  },
+  }
 };
 </script>
 

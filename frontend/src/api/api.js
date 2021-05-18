@@ -1,12 +1,23 @@
 import axios from 'axios';
-
 // const API_URL = 'http://smc-fcal.duckdns.org/';
-const API_URL = 'http://localhost:5000/api/'
+// const API_URL = 'http://localhost:5000/api/'
+const API_URL = process.env.VUE_APP_API_URL
 const client = axios.create({
     baseURL: API_URL,
 });
 
 client.defaults.headers.common['X-Requeted-With'] = 'XMLHttpRequest';
+client.defaults.headers.common['Authorization'] = `Bearer: ${authHeader()}`
+
+function authHeader(){
+    console.log('autheader called')
+    if (localStorage.getItem('token')) {
+        return localStorage.getItem('token')
+    }
+    else{
+        return ''
+    }
+}
 
 const configHandler = (config) => {
     return config;
@@ -17,7 +28,7 @@ const successHandler = (response) => {
 };
 
 const errorHandler = (error) =>{
-    console.error(error);
+    console.log(error);
     let messageData = Object.create(null);
     messageData.title = 'Ocurrió un error en la solicitud';
     messageData.content = '';
@@ -37,10 +48,9 @@ const errorHandler = (error) =>{
     }
     return Promise.reject(messageData)
 }
-
 client.interceptors.request.use(
     config => configHandler(config),
-    error => console.log(error)
+    error => console.log(error)    
 );
 
 client.interceptors.response.use(

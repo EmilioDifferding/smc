@@ -7,7 +7,7 @@ export default {
         params = {
             'params': params,
         };
-        return api.get(`${resource}`,params)
+        return api.get(`${resource}`)
     },
     find (id, params) {
         params = {

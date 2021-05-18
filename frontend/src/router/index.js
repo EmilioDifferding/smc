@@ -6,14 +6,7 @@ Vue.use(VueRouter)
 
 
 import routes from './routes'
-// const routes = [
-//   {
-//     path: '/',
-//     name: 'Home',
-//     component: Home
-//   },
-  
-// ]
+import store from '@/store'
 
 const router = new VueRouter({
   mode: 'history',
@@ -21,6 +14,21 @@ const router = new VueRouter({
   linkExactActiveClass: 'has-text-light',
   base: process.env.BASE_URL,
   routes
+})
+router.beforeEach ((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+      if (!store.getters['auth/isAuthenticated'] && to.name !== 'Login') {
+        next({
+          name: 'Login',
+          params: { nextUrl: to.fullPath }
+        });
+      } else {
+        next();
+      }
+      
+  }else{
+      next()
+  }
 })
 
 export default router

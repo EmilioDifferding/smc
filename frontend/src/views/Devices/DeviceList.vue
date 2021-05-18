@@ -62,27 +62,27 @@ export default {
   name: "DeviceList",
   components: {
     PortletBase,
-    CreateButton,
+    CreateButton
   },
   data() {
     return {
       isLoading: false,
-      devices: [],
+      devices: []
     };
   },
   computed: {
     table() {
       return {
-        rows: this.devices.map((obj) => {
+        rows: this.devices.map(obj => {
           let props = this.$router.resolve({
             name: "device.edit",
-            params: { id: obj.id },
+            params: { id: obj.id }
           });
           obj.to = props;
           return obj;
-        }),
+        })
       };
-    },
+    }
   },
   methods: {
     async fetchTableData() {
@@ -92,27 +92,37 @@ export default {
         this.devices = data["devices"];
         this.isLoading = false;
       } catch (error) {
+        this.$buefy.toast.open({
+              message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`? error.title: `${error}`,
+              type: "is-danger"
+            });
         this.isLoading = false;
-        console.log(error);
       }
     },
     async onDelete(id) {
       this.$buefy.dialog.confirm({
         message: `Seguro que desea borrar este elemento? la acción no puede deshacerse`,
         onConfirm: async () => {
-          await devicesApi.delete(id);
-          this.fetchTableData();
-          this.$buefy.toast.open({
-            message: "El Dispositivo fue eliminado correctamente",
-            type: "is-success",
-          });
-        },
+          try {
+            await devicesApi.delete(id);
+            this.fetchTableData();
+            this.$buefy.toast.open({
+              message: "El Dispositivo fue eliminado correctamente",
+              type: "is-success"
+            });
+          } catch (error) {
+            this.$buefy.toast.open({
+              message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+              type: "is-danger"
+            });
+          }
+        }
       });
-    },
+    }
   },
-  mounted() {
+  created() {
     this.fetchTableData();
-  },
+  }
 };
 </script>
 

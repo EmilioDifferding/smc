@@ -6,6 +6,7 @@ models.py
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
+from werkzeug.security import generate_password_hash, check_password_hash
 
 convention = {
     "ix": 'ix_%(column_0_label)s',
@@ -76,7 +77,7 @@ class Alias(db.Model):
 class Measurement(db.Model):
     __tablename__ = 'measurements'
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime(), default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime(), default=datetime.now)
     values = db.relationship('Value', backref='measurement',lazy='dynamic')
     device_id = db.Column(db.Integer, db.ForeignKey('devices.id'))
     
@@ -115,3 +116,36 @@ class Place(db.Model):
             id=self.id,
             name=self.name,
         )
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(60), index=True, nullable=False)
+    email= db.Column(db.String(100), index=True, nullable=False, unique=True)
+    password = db.Column(db.String(255), nullable=False)
+    telegram_id = db.Column(db.Integer)
+
+
+
+    def __init__(self,name, email, password):
+        self.name = name
+        self.email = email
+        self.password = generate_password_hash(password, method='sha256')
+        
+    
+    @classmethod 
+    def authenticate(cls, **kwargs):
+        email = kwargs.get('email')
+        password = kwargs.get('password')
+
+        if not email or not password:
+            return None
+        
+        user = cls.query.filter_by(email=email).first()
+        if not user or not check_password_hash(user.password, password):
+            return None
+        
+        return user
+    
+    def to_dict(self):
+        return dict(id=self.id, name=self.name, email=self.email)

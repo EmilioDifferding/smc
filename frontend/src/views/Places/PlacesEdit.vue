@@ -37,7 +37,10 @@ export default {
         const data = await placesApi.find(this.$route.params.id);
         this.place = data;
       } catch (error) {
-        console.log("error");
+       this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger",
+        });
       }
     },
     async onSubmit() {
@@ -51,7 +54,10 @@ export default {
         });
         this.$router.push({ name: "places" });
       } catch (error) {
-        console.log(error)
+        this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger",
+        });
       }
     },
   },

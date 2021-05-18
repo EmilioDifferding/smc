@@ -37,7 +37,10 @@ export default {
         const data = await unitsApi.find(this.$route.params.id);
         this.unit = data;
       } catch (error) {
-        console.log("error");
+        this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger",
+        });
       }
     },
     async onSubmit() {
@@ -50,7 +53,12 @@ export default {
           type: "is-success"
         });
         this.$router.push({ name: "units" });
-      } catch (error) {}
+      } catch (error) {
+        this.$buefy.toast.open({
+          message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
+          type: "is-danger",
+        });
+      }
     },
   },
   created() {

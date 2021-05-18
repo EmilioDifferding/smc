@@ -1,13 +1,13 @@
 <template>
-  <portlet-base title="Dispositivos" subtitle="crear">
-    <device-form ref="form"> </device-form>
+  <portlet-base title="Usuarios" subtitle="Crear">
+    <users-form ref="form"></users-form>
     <template v-slot:action-footer>
       <b-button
         type="is-success"
         expanded
         label="Guardar"
         icon-left="check-bold"
-        @click.prevent="onSubmit()"
+        @click="onSubmit()"
       >
       </b-button>
     </template>
@@ -16,34 +16,40 @@
 
 <script>
 import PortletBase from "../../components/portlets/PortletBase";
-import DeviceForm from "./DeviceForm";
+import UsersForm from "./UsersForm";
 import { apiFactory } from "../../api/apiFactory";
-const devicesApi = apiFactory.get("devices");
-
+const usersApi = apiFactory.get("users");
 export default {
-  name: "DeviceCreate",
+  name: "UsersCreate",
   components: {
     PortletBase,
-    DeviceForm,
+    UsersForm
   },
-  methods: {
+  methods:{
     async onSubmit() {
       try {
         let formData = this.$refs.form.form;
-        await devicesApi.create(formData);
-        this.$buefy.toast.open({
-          message: `Operación Realizada`,
-          type: "is-success",
-        });
-        this.$router.push({ name: "devices" });
+        let response = await usersApi.create(formData);
+        if (response.error){
+          this.$buefy.toast.open({
+          message:`${response.msg}`,
+          type:'is-warning',
+        });  
+        }else{
+            this.$buefy.toast.open({
+              message:'Operación realizada.',
+              type:'is-success',
+            });
+            this.$router.push({name:'users'})
+          }
       } catch (error) {
         this.$buefy.toast.open({
           message: `<strong class="has-text-light">${error.title}</strong> <br> ${error.content}`,
           type: "is-danger",
         });
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
