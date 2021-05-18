@@ -11,11 +11,11 @@
           {{ props.row.id }}
         </b-table-column>
         <b-table-column field="name" label="Nombre" v-slot="props">
-          {{ props.row.name }}
-          <span>
             <router-link :to="props.row.id + '/data'">
-              <b-icon type="is-success" icon="file-eye"></b-icon></router-link
-          ></span>
+              {{ props.row.name }}
+              <span>
+              <b-icon type="is-success" icon="file-eye"></b-icon></span>
+            </router-link>
         </b-table-column>
         <b-table-column field="unic_id" label="Código único" v-slot="props">
           {{ props.row.unic_id }}
