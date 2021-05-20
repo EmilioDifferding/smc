@@ -226,6 +226,27 @@ def users(current_user):
     users = User.query.all()
     return jsonify({'users':[user.to_dict() for user in users]})
 
+@api.route('/users/<int:id>', methods=['GET', 'DELETE', 'PUT'])
+@token_required
+def user(current_user, id):
+    user = User.query.filter_by(id=id).first()
+    if request.method == 'PUT':
+        data = request.get_json()
+        print(data)
+        user.name = data['name']
+        user.email=data['email']
+        if 'password' in data:
+            user.__init__(name=data['name'],email=data['email'],password=data['password'])
+        db.session.commit()
+        return jsonify(user.to_dict()),201
+    elif request.method == 'DELETE':
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'msg':'success'}), 200
+    else:
+        return jsonify(user.to_dict())
+
+
 @api.route('/login',methods=['POST'])
 def login():
     data = request.get_json()

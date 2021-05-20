@@ -42,7 +42,7 @@ export default {
         async signIn({ commit, dispatch }, credentials){
             try {
                 console.log("LOGIN IN...")
-                await axios.post(`${process.env.VUE_APP_API_URL}/login`, credentials).then(response =>{
+                await axios.post(`${process.env.VUE_APP_API_URL}login`, credentials).then(response =>{
                     console.log(response)
                     commit('SET_USER', response.data.user);
                     commit('SET_TOKEN', response.data.token);
