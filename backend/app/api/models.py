@@ -124,7 +124,7 @@ class User(db.Model):
     email= db.Column(db.String(100), index=True, nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
     telegram_id = db.Column(db.Integer)
-
+    role_id=db.Column(db.Integer, db.ForeignKey('roles.id'))    
 
 
     def __init__(self,name, email, password):
@@ -148,4 +148,19 @@ class User(db.Model):
         return user
     
     def to_dict(self):
-        return dict(id=self.id, name=self.name, email=self.email)
+        return dict(id=self.id, name=self.name, email=self.email, role=self.role)
+
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
+    users = db.relationship('User', backref='role', lazy='dynamic')
+
+    @staticmethod
+    def generate_roles():
+        r = Role(name='administrador')
+        db.session.add(r)
+        db.session.commit()
+        r = Role(name='usuario')
+        db.session.add(r)
+        db.session.commit()

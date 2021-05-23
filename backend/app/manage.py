@@ -7,7 +7,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
 from api.app import create_app
-from api.models import db, Alias, Device, Place, Value, Measurement, Unit, User
+from api.models import db, Alias, Device, Place, Value, Measurement, Unit, User, Role
 
 app = create_app()
 
@@ -37,7 +37,8 @@ def shell_ctx():
         Measurement=Measurement,
         Unit=Unit,
         Value=Value,
-        User=User
+        User=User,
+        Role=Role
     )
 
 if __name__ == '__main__':
