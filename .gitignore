@@ -10,7 +10,7 @@ backend/app/api/__pycache__/api.cpython-39.pyc
 backend/app/smc.ini
 backend/app/api/config.py
 
-
+*.pyc
 # local env files
 .env.production
 .env.local
