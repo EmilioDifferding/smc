@@ -28,10 +28,9 @@ export default {
             state.user = obj;
         },
         SET_TOKEN (state, value){
-            console.log('SETTING TOKEN')
-            api.defaults.headers.common['Authorization'] = `Bearer: ${value}`
             localStorage.setItem('token', value)
             state.token = value
+            api.defaults.headers.common['Authorization'] = `Bearer: ${value}`
         }
     },
     actions: {
@@ -41,9 +40,7 @@ export default {
         },
         async signIn({ commit, dispatch }, credentials){
             try {
-                console.log("LOGIN IN...")
                 await axios.post(`${process.env.VUE_APP_API_URL}login`, credentials).then(response =>{
-                    console.log(response)
                     commit('SET_USER', response.data.user);
                     commit('SET_TOKEN', response.data.token);
                 })
@@ -58,10 +55,8 @@ export default {
         async me ({ commit }) {
             try {
                 usersApi.showme().then(response =>{
-                    console.log(response)
                 })
             } catch (e) {
-                console.log('ME ERROR ')
                 commit('SET_USER', null);
                 commit('SET_TOKEN', '')
             }
@@ -75,6 +70,5 @@ function isValidJwt (jwt){
     const data = JSON.parse(atob(jwt.split('.')[1]))
     const exp = new Date(data.exp * 1000)
     const now = new Date()
-    console.log(exp - now)
     return now < exp
 }

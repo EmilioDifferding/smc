@@ -127,9 +127,10 @@ class User(db.Model):
     role_id=db.Column(db.Integer, db.ForeignKey('roles.id'))    
 
 
-    def __init__(self,name, email, password):
+    def __init__(self,name, email, password, role):
         self.name = name
         self.email = email
+        self.role_id = role
         self.password = generate_password_hash(password, method='sha256')
         
     
@@ -148,13 +149,17 @@ class User(db.Model):
         return user
     
     def to_dict(self):
-        return dict(id=self.id, name=self.name, email=self.email, role=self.role)
+        return dict(id=self.id, name=self.name, email=self.email, role=self.role.to_dict(False))
 
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32))
     users = db.relationship('User', backref='role', lazy='dynamic')
+
+    def to_dict(self, with_users:bool = False) -> dict:
+        role = dict(id=self.id, name=self.name, users=[u.to_dict() for u in self.users]) if with_users else dict(id=self.id, name=self.name)
+        return role
 
     @staticmethod
     def generate_roles():

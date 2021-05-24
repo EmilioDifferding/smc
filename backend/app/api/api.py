@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, request, current_app
 from functools import wraps
 import jwt
 from datetime import datetime, timedelta
-from .models import db, Alias, Device, Place, Measurement, Unit, Value, User
+from .models import db, Alias, Device, Place, Measurement, Unit, Value, User, Role
 api = Blueprint('api', __name__)
 
 import telegram
@@ -235,6 +235,7 @@ def user(current_user, id):
         print(data)
         user.name = data['name']
         user.email=data['email']
+        user.role_id=data['role']
         if 'password' in data:
             user.__init__(name=data['name'],email=data['email'],password=data['password'])
         db.session.commit()
@@ -246,6 +247,10 @@ def user(current_user, id):
     else:
         return jsonify(user.to_dict())
 
+@api.route('/roles', methods=['GET'])
+def roles():
+    roles = Role.query.all()
+    return jsonify({'roles':[role.to_dict(False) for role in roles]})
 
 @api.route('/login',methods=['POST'])
 def login():

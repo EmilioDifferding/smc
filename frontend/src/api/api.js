@@ -10,7 +10,6 @@ client.defaults.headers.common['X-Requeted-With'] = 'XMLHttpRequest';
 client.defaults.headers.common['Authorization'] = `Bearer: ${authHeader()}`
 
 function authHeader(){
-    console.log('autheader called')
     if (localStorage.getItem('token')) {
         return localStorage.getItem('token')
     }

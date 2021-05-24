@@ -16,7 +16,7 @@
         <b-table-column field="email" label="E-mail" v-slot="props">
           {{ props.row.email }}
         </b-table-column>
-        <b-table-column field="actions" label="Acciones" v-slot="props">
+        <b-table-column field="actions" label="Acciones" v-slot="props" v-if="['administrador'].includes(role)">
           <div class="buttons">
             <router-link :to="props.row.to.href">
               <b-button type="is-info" size="is-small" title="Editar">
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapGetters } from "vuex";
 import PortletBase from "../../components/portlets/PortletBase";
 import CreateButton from "../../components/buttons/CreateButton";
 import { apiFactory } from "../../api/apiFactory";
@@ -64,6 +64,12 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({
+      user: 'auth/user'
+    }),
+     role(){
+      return this.user? this.user.role.name: null
+    },
     table() {
       return {
         rows: this.users.map(obj => {
