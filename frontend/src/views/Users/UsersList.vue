@@ -108,7 +108,7 @@ export default {
             await usersApi.delete(id);
             this.fetchUsers();
             this.$buefy.toast.open({
-              message: "El Dispositivo fue eliminado correctamente",
+              message: "El usuario fue eliminado correctamente",
               type: "is-success"
             });
           } catch (error) {
