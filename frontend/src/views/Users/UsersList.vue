@@ -16,6 +16,11 @@
         <b-table-column field="email" label="E-mail" v-slot="props">
           {{ props.row.email }}
         </b-table-column>
+
+        <b-table-column field="role" label="Permiso" v-slot="props">
+          {{ props.row.role.name }}
+        </b-table-column>
+
         <b-table-column field="actions" label="Acciones" v-slot="props" v-if="['administrador'].includes(role)">
           <div class="buttons">
             <router-link :to="props.row.to.href">
