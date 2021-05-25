@@ -18,6 +18,12 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(metadata=metadata)
 
+device_user = db.Table(
+    'device_user',
+    db.Column('device_id',db.Integer, db.ForeignKey('devices.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+)
+
 class Device(db.Model):
     __tablename__ = 'devices'
     id = db.Column(db.Integer, primary_key=True)
@@ -123,15 +129,17 @@ class User(db.Model):
     name = db.Column(db.String(60), index=True, nullable=False)
     email= db.Column(db.String(100), index=True, nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
-    telegram_id = db.Column(db.Integer)
-    role_id=db.Column(db.Integer, db.ForeignKey('roles.id'))    
+    telegram_id = db.Column(db.Integer, nullable=True)
+    role_id=db.Column(db.Integer, db.ForeignKey('roles.id'), default='usuario')
+    devices = db.relationship('Device', secondary=device_user, backref=db.backref('users', lazy='dynamic'))
 
 
-    def __init__(self,name, email, password, role):
+    def __init__(self,name, email, password, role, telegram_id=None):
         self.name = name
         self.email = email
         self.role_id = role
         self.password = generate_password_hash(password, method='sha256')
+        self.telegram_id = telegram_id
         
     
     @classmethod 
@@ -149,7 +157,7 @@ class User(db.Model):
         return user
     
     def to_dict(self):
-        return dict(id=self.id, name=self.name, email=self.email, role=self.role.to_dict(False))
+        return dict(id=self.id, name=self.name, email=self.email, role=self.role.to_dict(False), telegram_id=self.telegram_id)
 
 class Role(db.Model):
     __tablename__ = 'roles'

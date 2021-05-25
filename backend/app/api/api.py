@@ -236,6 +236,7 @@ def user(current_user, id):
         user.name = data['name']
         user.email=data['email']
         user.role_id=data['role']
+        user.telegram_id = data['telegram_id'] if 'telegram_id' in data else None
         if 'password' in data:
             user.__init__(name=data['name'],email=data['email'],password=data['password'])
         db.session.commit()
