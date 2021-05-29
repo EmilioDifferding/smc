@@ -232,10 +232,19 @@ def user(current_user, id):
     user = User.query.filter_by(id=id).first()
     if request.method == 'PUT':
         data = request.get_json()
-        print(data)
+        # print(data)
         user.name = data['name']
         user.email=data['email']
         user.role_id=data['role']
+        user.devices=[]
+        for device in data['devices']:
+            d = Device.query.filter_by(id=device['id']).first()
+            if user.devices:
+                for user_device in user.devices:
+                    if d.id != user_device.id:
+                        user.devices.append(d) 
+            else:
+                user.devices.append(d)
         user.telegram_id = data['telegram_id'] if 'telegram_id' in data else None
         if 'password' in data:
             user.__init__(name=data['name'],email=data['email'],password=data['password'])
