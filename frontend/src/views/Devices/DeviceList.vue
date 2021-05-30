@@ -95,7 +95,7 @@ export default {
     async fetchTableData() {
       this.isLoading = true;
       try {
-        const data = await devicesApi.get();
+        const data = await devicesApi.get({user:this.user.id});
         this.devices = data["devices"];
         this.isLoading = false;
       } catch (error) {

@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex';
 import {apiFactory} from '../../api/apiFactory';
 const usersApi = apiFactory.get('users')
 const devicesApi = apiFactory.get('devices')
@@ -89,6 +90,9 @@ export default {
     },
   },
   computed:{
+    ...mapGetters({
+      userCreator: 'auth/user'
+    }),
     table(){
       return{
         columns:[
@@ -132,7 +136,7 @@ export default {
       this.roles = roles
     },
     async fetchDevices(){
-      let {devices} = await devicesApi.get()
+      let {devices} = await devicesApi.get({user:this.userCreator.id})
       this.devices = devices
       return devices
     },
