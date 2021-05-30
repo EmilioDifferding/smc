@@ -153,14 +153,6 @@ def devices(current_user):
             device.to_dict() for device in devices
         ]})
 
-# solo para pruebas por el momento.
-def filter_set(aliases, search_string):
-    def iterator_func(x):
-        if search_string == x.id:
-            return False
-        return True
-    return filter(iterator_func, aliases)
-
 @api.route('/devices/<int:id>', methods=['GET','PUT','DELETE'])
 @token_required
 def device(current_user,id):
@@ -200,15 +192,26 @@ def device(current_user,id):
 @api.route('/devices/<int:device_id>/data', methods=['GET'])
 @token_required
 def dump_data(current_user,device_id):
-    for device in current_user.devices:
-        if device.id == device_id:
-            measurements = Measurement.query.filter_by(device_id=device_id).all()
-            if measurements is not None:
-                return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None}), 200
-            return jsonify({
-                'measurements': [],
-                'name': None
-            })
+    if 'administrador' in current_user.role.name:
+        print('es admin')
+        measurements = Measurement.query.filter_by(device_id=device_id).all()
+        if measurements is not None:
+            return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None}), 200
+        return jsonify({
+            'measurements': [],
+            'name': None
+        })
+    else:
+        print('no es admin')
+        for device in current_user.devices:
+            if device.id == device_id:
+                measurements = Measurement.query.filter_by(device_id=device_id).all()
+                if measurements is not None:
+                    return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None}), 200
+                return jsonify({
+                    'measurements': [],
+                    'name': None
+                })
     return jsonify({}),401
 
 @api.route('/users', methods=['GET','POST'])
