@@ -34,5 +34,12 @@ export default {
     },
     showme(){
         return api.get(`/showme`);
+    },
+    getRoles(params){
+        params = {
+            'params': params,
+        };
+        return api.get(`/roles`)
     }
+
 }

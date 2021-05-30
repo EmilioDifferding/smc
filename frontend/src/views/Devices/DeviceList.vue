@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <portlet-base title="Dispositivos" subtitle="Listado">
-      <template slot="head-actions">
+      <template slot="head-actions" v-if="['administrador'].includes(role)">
         <router-link to="crear">
           <create-button> </create-button>
         </router-link>
@@ -11,11 +11,11 @@
           {{ props.row.id }}
         </b-table-column>
         <b-table-column field="name" label="Nombre" v-slot="props">
-          {{ props.row.name }}
-          <span>
             <router-link :to="props.row.id + '/data'">
-              <b-icon type="is-success" icon="file-eye"></b-icon></router-link
-          ></span>
+              {{ props.row.name }}
+              <span>
+              <b-icon type="is-success" icon="file-eye"></b-icon></span>
+            </router-link>
         </b-table-column>
         <b-table-column field="unic_id" label="Código único" v-slot="props">
           {{ props.row.unic_id }}
@@ -23,7 +23,7 @@
         <b-table-column field="place" label="Lugar" v-slot="props">
           {{ props.row.place.name }}
         </b-table-column>
-        <b-table-column field="actions" label="Acciones" v-slot="props">
+        <b-table-column field="actions" label="Acciones" v-slot="props" v-if="['administrador'].includes(role)">
           <div class="buttons">
             <router-link :to="props.row.to.href">
               <b-button type="is-info" size="is-small" title="Editar">
@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex'
 import PortletBase from "../../components/portlets/PortletBase";
 import CreateButton from "../../components/buttons/CreateButton";
 import { apiFactory } from "../../api/apiFactory";
@@ -71,6 +72,12 @@ export default {
     };
   },
   computed: {
+    ...mapGetters({
+      user: 'auth/user'
+    }),
+     role(){
+      return this.user? this.user.role.name: null
+    },
     table() {
       return {
         rows: this.devices.map(obj => {
@@ -88,7 +95,7 @@ export default {
     async fetchTableData() {
       this.isLoading = true;
       try {
-        const data = await devicesApi.get();
+        const data = await devicesApi.get({user:this.user.id});
         this.devices = data["devices"];
         this.isLoading = false;
       } catch (error) {

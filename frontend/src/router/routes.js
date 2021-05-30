@@ -40,9 +40,10 @@ export default [
                 path: '/usuarios',
                 title: 'Usuarios',
                 component: UsersIndex,
-                // meta:{
-                //     requiresAuth: true
-                // },
+                meta:{
+                    requiresAuth: true,
+                    requiresPermissions:['administrador']
+                },
                 children:[
                     {
                         path:'',
@@ -65,24 +66,33 @@ export default [
                 path: '/dispositivos',
                 title: 'Dispositivos',
                 component: DeviceIndex,
-                // meta:{
-                //     requiresAuth: true
-                // },
+                meta:{
+                    requiresAuth: true
+                },
                 children: [
                     {
                         path: '',
                         name: 'devices',
-                        component: DeviceList
+                        component: DeviceList,
+                        meta:{
+                            requiresPermissions: ['administrador', 'usuario']
+                        }
                     },
                     {
                         path: 'crear',
                         name: 'create',
-                        component: DeviceCreate
+                        component: DeviceCreate,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     },
                     {
                         path: ':id/editar',
                         name: 'device.edit',
-                        component: DeviceEdit
+                        component: DeviceEdit,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     },
                     {
                         path:':id/data',
@@ -94,49 +104,67 @@ export default [
             {
                 path: '/lugares',
                 component: PlacesIndex,
-                // meta:{
-                //     requiresAuth: true
-                // },
+                meta:{
+                    requiresAuth: true
+                },
                 children: [
                     {
                         path: '',
                         name: 'places',
-                        component: PlacesList
+                        component: PlacesList,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     },
                     {
                         path: 'crear',
                         name: 'places.create',
-                        component: PlacesCreate
+                        component: PlacesCreate,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     },
                     {
                         path: ':id/editar',
                         name: 'places.edit',
                         component: PlacesEdit,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     }
                 ]
             },
             {
-                path: '/units',
+                path: '/unidades',
                 title: "Units",
                 component: UnitsIndex,
-                // meta:{
-                //     requiresAuth: true
-                // },
+                meta:{
+                    requiresAuth: true
+                },
                 children: [
                     {
                         path: '',
                         name: 'units',
-                        component: UnitsList
+                        component: UnitsList,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     },
                     {
                         path: 'crear',
                         name: 'units.create',
                         component: UnitsCreate,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     },
                     {
                         path: ':id/editar',
                         name: 'units.edit',
-                        component: UnitsEdit
+                        component: UnitsEdit,
+                        meta:{
+                            requiresPermissions: ['administrador']
+                        }
                     }
                 ]
             }

@@ -27,17 +27,29 @@
             <b-menu class="is-custom-mobile" :activable="false">
               <b-menu-list>
                 <b-menu-item
-                  class="sidebarmenu__item"
-                  v-for="row in sidebarItems"
-                  :key="row.name"
-                  @click="currentRow = row"
-                  :icon="row.icon"
-                  :tag="row.tag"
-                  :to="row.to"
-                  :label="row.name"
-                >
-
-                </b-menu-item>
+                  :to="{name:'devices'}"
+                  tag="router-link"
+                  icon="memory"
+                  label="Dispositivos"
+                ></b-menu-item>
+                <b-menu-item v-if="['administrador'].includes(role)"
+                  :to="{name:'users'}"
+                  tag="router-link"
+                  icon="account"
+                  label="Usuarios"
+                ></b-menu-item>
+                <b-menu-item v-if="['administrador'].includes(role)"
+                  :to="{name:'places'}"
+                  tag="router-link"
+                  icon="map-marker-multiple"
+                  label="Lugares"
+                ></b-menu-item>
+                <b-menu-item v-if="['administrador'].includes(role)"
+                  :to="{name:'units'}"
+                  tag="router-link"
+                  icon="speedometer-medium"
+                  label="Unidades"
+                ></b-menu-item>
               </b-menu-list>
               
             </b-menu>
@@ -62,47 +74,24 @@ export default {
       reduce: false,
       activable: false,
       active:false,
-      sidebarItems:[
-        {
-          name:'Dispositivos',
-          icon: 'memory',
-          to: {name: 'devices'},
-          tag: 'router-link'
-        },
-        {
-          name: 'Usuarios',
-          icon: 'account',
-          to: {name: 'users'},
-          tag: 'router-link'
-        },
-        {
-          name:'Lugares',
-          icon: 'map-marker-multiple',
-          to: {name: 'places'},
-          tag: 'router-link'
-        },
-        {
-          name:'Unidades',
-          icon: 'speedometer-medium',
-          to: {name: 'units'},
-          tag: 'router-link'
-        }
-
-      ]
     };
   },
   methods:{
     ...mapActions({logout:'auth/logout'}),
     onLogout(){
-      this.logout;
+      this.logout();
       this.$router.replace({name:'Login'})
     }
   },
   computed:{
     ...mapGetters({
       user: 'auth/user'
-    })
-  }
+    }),
+     role(){
+      return this.user? this.user.role.name: null
+    }
+  },
+ 
 };
 </script>
 

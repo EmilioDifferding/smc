@@ -18,6 +18,12 @@ convention = {
 metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(metadata=metadata)
 
+device_user = db.Table(
+    'device_user',
+    db.Column('device_id',db.Integer, db.ForeignKey('devices.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'))
+)
+
 class Device(db.Model):
     __tablename__ = 'devices'
     id = db.Column(db.Integer, primary_key=True)
@@ -123,14 +129,20 @@ class User(db.Model):
     name = db.Column(db.String(60), index=True, nullable=False)
     email= db.Column(db.String(100), index=True, nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
-    telegram_id = db.Column(db.Integer)
+    telegram_id = db.Column(db.Integer, nullable=True)
+    role_id=db.Column(db.Integer, db.ForeignKey('roles.id'), default='usuario')
+    devices = db.relationship('Device', secondary=device_user, backref=db.backref('users', lazy='dynamic'))
 
 
-
-    def __init__(self,name, email, password):
+    def __init__(self,name, email, password, role, telegram_id=None, devices=[]):
         self.name = name
         self.email = email
+        self.role_id = role
         self.password = generate_password_hash(password, method='sha256')
+        self.telegram_id = telegram_id
+        for device in devices:
+            d = Device.query.filter_by(id=device['id']).first()
+            self.devices.append(d)
         
     
     @classmethod 
@@ -147,5 +159,45 @@ class User(db.Model):
         
         return user
     
+    @staticmethod
+    def create_admin():
+        u = User(
+            name='admin',
+            email='e@mail.com',
+            password='admin',
+            role=Role.query.filter_by(name='administrador').first().id
+        )
+        print (u.role_id)
+        db.session.add(u)
+        db.session.commit()
+        return 'Ok'
+
+    
     def to_dict(self):
-        return dict(id=self.id, name=self.name, email=self.email)
+        return dict(
+            id=self.id,
+            name=self.name,
+            email=self.email,
+            role=self.role.to_dict(False),
+            telegram_id=self.telegram_id,
+            devices=[d.to_dict() for d in self.devices]
+            )
+
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32))
+    users = db.relationship('User', backref='role', lazy='dynamic')
+
+    def to_dict(self, with_users:bool = False) -> dict:
+        role = dict(id=self.id, name=self.name, users=[u.to_dict() for u in self.users]) if with_users else dict(id=self.id, name=self.name)
+        return role
+
+    @staticmethod
+    def generate_roles():
+        r = Role(name='administrador')
+        db.session.add(r)
+        db.session.commit()
+        r = Role(name='usuario')
+        db.session.add(r)
+        db.session.commit()

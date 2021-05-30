@@ -23,6 +23,25 @@ router.beforeEach ((to, from, next) => {
           params: { nextUrl: to.fullPath }
         });
       } else {
+        let role = store.getters['auth/user'].role.name;
+        if (to.matched.some(record => record.meta.requiresPermissions)) {
+          to.matched.some(record => {
+            if(record.meta.requiresPermissions) {
+              let canGoNext = false;
+              for (const [index, element] of record.meta.requiresPermissions.entries()){
+                if (role === element){
+                  canGoNext = true;
+                  break;
+                }
+              };
+              if (canGoNext){
+                next()
+              } else {
+                next({name: 'devices'});
+              }
+            }
+          })
+        }
         next();
       }
       

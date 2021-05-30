@@ -8,7 +8,7 @@ from flask import Blueprint, jsonify, request, current_app
 from functools import wraps
 import jwt
 from datetime import datetime, timedelta
-from .models import db, Alias, Device, Place, Measurement, Unit, Value, User
+from .models import db, Alias, Device, Place, Measurement, Unit, Value, User, Role
 api = Blueprint('api', __name__)
 
 import telegram
@@ -76,7 +76,6 @@ def place(current_user,id):
         data = request.get_json()
         place = Place.query.get(id)
         place.name = data['name']
-        print(data)
         db.session.commit()
         return jsonify ({'msg': 'success'}), 201
     elif request.method == 'DELETE':
@@ -124,7 +123,6 @@ def unit(current_user,id):
 def devices(current_user):
     if request.method == 'POST':
         data = request.get_json()
-        print(data)
         device = Device.query.filter_by(unic_id=data['unic_id']).first()
         if device is None:
             new_device = Device(
@@ -145,7 +143,12 @@ def devices(current_user):
             db.session.commit()
             return jsonify({'msg': 'success'}),200
     else:
-        devices = Device.query.all()
+        user = User.query.get(request.args.get('user'))
+        if 'administrador' in user.role.name:
+            devices = Device.query.all()
+        else:
+            devices = user.devices
+
         return jsonify({'devices':[
             device.to_dict() for device in devices
         ]})
@@ -197,14 +200,16 @@ def device(current_user,id):
 @api.route('/devices/<int:device_id>/data', methods=['GET'])
 @token_required
 def dump_data(current_user,device_id):
-    measurements = Measurement.query.filter_by(device_id=device_id).all()
-    print(measurements)
-    if measurements is not None:
-        return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None}), 200
-    return jsonify({
-        'measurements': [],
-        'name': None
-    })
+    for device in current_user.devices:
+        if device.id == device_id:
+            measurements = Measurement.query.filter_by(device_id=device_id).all()
+            if measurements is not None:
+                return jsonify({"measurements":[measurement.to_dict() for measurement in measurements],"name":measurements[0].device.name if len(measurements) else None}), 200
+            return jsonify({
+                'measurements': [],
+                'name': None
+            })
+    return jsonify({}),401
 
 @api.route('/users', methods=['GET','POST'])
 @token_required
@@ -225,6 +230,41 @@ def users(current_user):
     
     users = User.query.all()
     return jsonify({'users':[user.to_dict() for user in users]})
+
+@api.route('/users/<int:id>', methods=['GET', 'DELETE', 'PUT'])
+@token_required
+def user(current_user, id):
+    user = User.query.filter_by(id=id).first()
+    if request.method == 'PUT':
+        data = request.get_json()
+        user.name = data['name']
+        user.email=data['email']
+        user.role_id=data['role']
+        user.devices=[]
+        for device in data['devices']:
+            d = Device.query.filter_by(id=device['id']).first()
+            if user.devices:
+                for user_device in user.devices:
+                    if d.id != user_device.id:
+                        user.devices.append(d) 
+            else:
+                user.devices.append(d)
+        user.telegram_id = data['telegram_id'] if 'telegram_id' in data else None
+        if 'password' in data:
+            user.__init__(name=data['name'],email=data['email'],password=data['password'], role=data['role'])
+        db.session.commit()
+        return jsonify(user.to_dict()),201
+    elif request.method == 'DELETE':
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'msg':'success'}), 200
+    else:
+        return jsonify(user.to_dict())
+
+@api.route('/roles', methods=['GET'])
+def roles():
+    roles = Role.query.all()
+    return jsonify({'roles':[role.to_dict(False) for role in roles]})
 
 @api.route('/login',methods=['POST'])
 def login():
@@ -247,13 +287,11 @@ def login():
         'user': user.to_dict(),
         'authenticated':True
          }
-    print(json)
     return jsonify(json)
 
 @api.route('/showme', methods=['GET'])
 @token_required
 def me(current_user):
-    print(current_user.to_dict())
     return jsonify(current_user.to_dict()),200
 
 ###############################
@@ -276,8 +314,6 @@ def store_data():
                 )
                 new_measurement.values.append(value_to_add)
                 message=''
-                print('VALORRRR: {}'.format(alias.min_limit) )
-                print('VALOR LEIDO {}'.format(type(value_to_add.value)))
                 if alias.min_limit is not False and value_to_add.value <= alias.min_limit:
                     message = 'Algo está mal con {d}, {a} está por debajo del valor establecido ({ml}), Valor actual: {v}'.format(d=alias.device.name,ml=alias.min_limit, a=alias.name, v=value_to_add.value)
                 if alias.max_limit is not False and value_to_add.value >= alias.max_limit:
@@ -295,5 +331,4 @@ def store_data():
             "error": True
         }
     
-    print(data)
     return jsonify(response)
