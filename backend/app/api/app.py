@@ -15,7 +15,7 @@ def create_app(app_name='SMC_API'):
     app.register_blueprint(api, url_prefix="/api")
 
     from api.botApi import bot
-    app.register_blueprint(bot, url_prefix="/bot")
+    app.register_blueprint(bot, url_prefix="/api/bot")
 
     from api.models import db
     db.init_app(app)
