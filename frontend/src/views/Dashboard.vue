@@ -23,6 +23,9 @@
                 </div>
               </div>
             </div>
+            <div class="container has-background-warning has-text-centered mt-3" v-if="hasPendings" @click="onConfirmRegister">
+              <registration-button></registration-button>
+            </div>
             <hr>
             <b-menu class="is-custom-mobile" :activable="false">
               <b-menu-list>
@@ -65,8 +68,14 @@
 
 <script>
 import {mapGetters, mapActions} from 'vuex'
+import RegistrationButton from '../components/buttons/RegistrationButton'
+import {apiFactory} from '../api/apiFactory'
+const usersApi = apiFactory.get('users')
 export default {
   name:'Dashboard',
+  components:{
+    RegistrationButton
+  },
   data() {
     return {
       expanOnHover: false,
@@ -74,6 +83,8 @@ export default {
       reduce: false,
       activable: false,
       active:false,
+      hasPendings:false,
+      regData:{},
     };
   },
   methods:{
@@ -81,7 +92,23 @@ export default {
     onLogout(){
       this.logout();
       this.$router.replace({name:'Login'})
-    }
+    },
+    async checkPendings(){
+      let data = await usersApi.getPendings()
+      this.hasPendings = data.is_pending
+      this.regData = data
+      
+    },
+    async onConfirmRegister(){
+      try{
+        let res = await usersApi.applyPendings(this.regData)
+        this.regData={}
+        this.hasPendings=false
+        alert(res.msg)
+      }catch(error){
+        console.error(error);
+      }
+    },
   },
   computed:{
     ...mapGetters({
@@ -91,6 +118,9 @@ export default {
       return this.user? this.user.role.name: null
     }
   },
+  mounted(){
+    this.checkPendings()
+  }
  
 };
 </script>
