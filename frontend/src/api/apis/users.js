@@ -40,6 +40,15 @@ export default {
             'params': params,
         };
         return api.get(`/roles`)
-    }
+    },
+    getPendings(params){
+        params = {
+            'params': params,
+        };
+        return api.get(`${resource}/pendings`)
+    },
+    applyPendings(data){
+        return api.post(`${resource}/pendings/apply`, data)
+    },
 
 }

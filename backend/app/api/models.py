@@ -201,3 +201,9 @@ class Role(db.Model):
         r = Role(name='usuario')
         db.session.add(r)
         db.session.commit()
+
+class Pending_registration(db.Model):
+    __tablename__='pending_registrations'
+    id=db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    telegram_id = db.Column(db.String(32))

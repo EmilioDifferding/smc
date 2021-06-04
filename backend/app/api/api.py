@@ -8,15 +8,14 @@ from flask import Blueprint, jsonify, request, current_app
 from functools import wraps
 import jwt
 from datetime import datetime, timedelta
-from .models import db, Alias, Device, Place, Measurement, Unit, Value, User, Role
+from .models import db, Alias, Device, Place, Measurement, Unit, Value, User, Role, Pending_registration
+from .config import TELEGRAM_TOKEN_PROD
 api = Blueprint('api', __name__)
 
 import telegram
-global chat_id
 global bot
-chat_id=75150392
 
-bot = telegram.Bot(token="1647818581:AAGzhsza7cUAfEtv-yAyqT2XLeqjo2hz8LQ")
+bot = telegram.Bot(token=TELEGRAM_TOKEN_PROD)
 
 def token_required(f):
     @wraps(f)
@@ -252,7 +251,12 @@ def user(current_user, id):
                         user.devices.append(d) 
             else:
                 user.devices.append(d)
-        user.telegram_id = data['telegram_id'] if 'telegram_id' in data else None
+        tele_id = data.get('telegram_id')
+        if tele_id:
+            user.telegram_id = tele_id
+        else:
+            user.telegram_id = None
+            
         if 'password' in data:
             user.__init__(name=data['name'],email=data['email'],password=data['password'], role=data['role'])
         db.session.commit()
@@ -263,6 +267,35 @@ def user(current_user, id):
         return jsonify({'msg':'success'}), 200
     else:
         return jsonify(user.to_dict())
+
+@api.route('/users/pendings')
+@token_required
+def get_pending_registrations(current_user):
+    pending = Pending_registration.query.filter_by(user_id=current_user.id).first()
+    if pending is not None:
+        print(pending)
+        return jsonify({
+            "is_pending":True,
+            "telegram_id": pending.telegram_id
+            })
+    else:
+        return jsonify({
+        "is_pending":False,
+        "telegram_id": None
+        })
+
+@api.route('/users/pendings/apply', methods=['POST'])
+@token_required
+def apply_bot_registration(current_user):
+    if request.method == 'POST':
+        registration_code = request.get_json()['telegram_id']
+        pending = Pending_registration.query.filter_by(telegram_id=registration_code).first()
+        if pending is not None and pending.user_id == current_user.id:
+            current_user.telegram_id = registration_code
+            db.session.delete(pending)
+            db.session.commit()
+    return jsonify({'msg': 'Cuenta de Telegram registrada con exito!'})
+        
 
 @api.route('/roles', methods=['GET'])
 def roles():
@@ -322,7 +355,9 @@ def store_data():
                 if alias.max_limit is not False and value_to_add.value >= alias.max_limit:
                     message = 'Algo está mal con {d}, {a} está por encima del valor establecido ({ml}), Valor actual: {v}'.format(d=alias.device.name,ml=alias.max_limit, a=alias.name, v=value_to_add.value)
                 if message:
-                    bot.send_message(chat_id=chat_id, text=message)
+                    for user in device.users:
+                        if user.telegram_id:
+                            bot.send_message(chat_id=user.telegram_id, text=message)
         db.session.commit()
         response = {
             "msg": "Data was stored",
