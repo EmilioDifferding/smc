@@ -9,14 +9,13 @@ from functools import wraps
 import jwt
 from datetime import datetime, timedelta
 from .models import db, Alias, Device, Place, Measurement, Unit, Value, User, Role, Pending_registration
+from .config import TELEGRAM_TOKEN_PROD
 api = Blueprint('api', __name__)
 
 import telegram
-global chat_id
 global bot
-chat_id=75150392
 
-bot = telegram.Bot(token='201272963:AAGOzyjxuQL881PPd3ya_9JxV9olNKRMS1M')#(token="1647818581:AAGzhsza7cUAfEtv-yAyqT2XLeqjo2hz8LQ")
+bot = telegram.Bot(token=TELEGRAM_TOKEN_PROD)
 
 def token_required(f):
     @wraps(f)
