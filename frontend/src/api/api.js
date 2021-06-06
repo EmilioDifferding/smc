@@ -42,6 +42,11 @@ const errorHandler = (error) =>{
             messageData.title = 'revisa los siguientes datos!';
             messageData.content = error.response.data.errors;
         }
+        if(error.response.status === 409) {
+            messageData.title = 'Elemento Duplicado!';
+            messageData.content = error.response.data.msg;
+            console.log( error.response.data.msg)
+        }
     }  else if (error.request) {
         messageData.title = 'sin respuesta del servidor!';
     }

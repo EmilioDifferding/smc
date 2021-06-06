@@ -59,11 +59,17 @@ def places(current_user):
     
     elif request.method == 'POST':
         data = request.get_json()
-        place = Place(name=data['name'])
-        db.session.add(place)
-        db.session.commit()
-        return jsonify(place.to_dict()),201
-
+        if Place.query.filter_by(name=data.get('name') ).first() is None:
+            print(data['name'])
+            place = Place(name=data['name'])
+            db.session.add(place)
+            db.session.commit()
+            return jsonify(place.to_dict()),201
+        else:
+            return jsonify({
+                'error':True,
+                'msg':'El recinto ya existe.'
+            }),409
 
 @api.route('/places/<int:id>', methods=('GET', 'PUT', 'DELETE'))
 @token_required
