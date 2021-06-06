@@ -100,25 +100,31 @@ def units(current_user):
         return jsonify({'units':[u.to_dict() for u in units]})
     elif request.method == 'POST':
         data = request.get_json()
-        new_unit = Unit(
-            name=data['name'],
-            symbol=data['symbol']
-        )
-        db.session.add(new_unit)
-        db.session.commit()
-        return jsonify ({'msg': 'success'}), 201
+        if Unit.query.filter_by(name=data.get('name')).first() is None:
+            new_unit = Unit(
+                name=data['name'],
+                symbol=data['symbol']
+            )
+            db.session.add(new_unit)
+            db.session.commit()
+            return jsonify ({'msg': 'success'}), 201
+        else:
+            return jsonify({'error':True, 'msg':'Ya existe una unidad con este nombre.'}), 409
 
 @api.route('/units/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @token_required
 def unit(current_user,id):
-    unit = Unit.query.filter_by(id=id).first_or_404()
+    unit = Unit.query.filter_by(id=id).first()
     
     if request.method == 'PUT':
         data = request.get_json()
-        unit.name = data['name']
-        unit.symbol = data['symbol']
-        db.session.commit()
-        return jsonify ({'msg': 'success'}), 200
+        if Unit.query.filter((Unit.name == data.get('name')) & (Unit.id != unit.id) ).first() is None:
+            unit.name = data['name']
+            unit.symbol = data['symbol']
+            db.session.commit()
+            return jsonify ({'msg': 'success'}), 200
+        else:
+            return jsonify({'error':True, 'msg':'Ya existe una unidad con este nombre.'}), 409
     elif request.method == 'DELETE':
         db.session.delete(unit)
         db.session.commit()
