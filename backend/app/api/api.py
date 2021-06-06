@@ -80,9 +80,12 @@ def place(current_user,id):
     elif request.method == 'PUT':
         data = request.get_json()
         place = Place.query.get(id)
-        place.name = data['name']
-        db.session.commit()
-        return jsonify ({'msg': 'success'}), 201
+        if Place.query.filter((Place.name == data.get('name')) & (Place.id != place.id)).first() is None:
+            place.name = data['name']
+            db.session.commit()
+            return jsonify ({'msg': 'success'}), 201
+        else:
+            return jsonify({'error': True, 'msg': 'ya existe un recinto con este nombre'}), 409
     elif request.method == 'DELETE':
         place = Place.query.get(id)
         db.session.delete(place)
@@ -245,32 +248,40 @@ def user(current_user, id):
     user = User.query.filter_by(id=id).first()
     if request.method == 'PUT':
         data = request.get_json()
-        user.name = data['name']
-        user.email=data['email']
-        user.role_id=data['role']
-        user.devices=[]
-        for device in data['devices']:
-            d = Device.query.filter_by(id=device['id']).first()
-            if user.devices:
-                for user_device in user.devices:
-                    if d.id != user_device.id:
-                        user.devices.append(d) 
+        try:
+            user.name = data['name']
+            user.email=data['email']
+            user.role_id=data['role']
+            user.devices=[]
+            for device in data['devices']:
+                d = Device.query.filter_by(id=device['id']).first()
+                if user.devices:
+                    for user_device in user.devices:
+                        if d.id != user_device.id:
+                            user.devices.append(d) 
+                else:
+                    user.devices.append(d)
+            tele_id = data.get('telegram_id')
+            if tele_id:
+                user.telegram_id = tele_id
             else:
-                user.devices.append(d)
-        tele_id = data.get('telegram_id')
-        if tele_id:
-            user.telegram_id = tele_id
-        else:
-            user.telegram_id = None
-            
-        if 'password' in data:
-            user.__init__(name=data['name'],email=data['email'],password=data['password'], role=data['role'])
-        db.session.commit()
-        return jsonify(user.to_dict()),201
+                user.telegram_id = None
+                
+            if 'password' in data:
+                user.__init__(name=data['name'],email=data['email'],password=data['password'], role=data['role'])
+            db.session.commit()
+            return jsonify(user.to_dict()),201
+        
+        except Exception:
+            return jsonify({
+                'error': True,
+                'msg': 'Ya se ha registrado un usuario con este correo.'
+            }), 409
     elif request.method == 'DELETE':
-        db.session.delete(user)
-        db.session.commit()
-        return jsonify({'msg':'success'}), 200
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({'msg':'success'}), 200
+        
     else:
         return jsonify(user.to_dict())
 
