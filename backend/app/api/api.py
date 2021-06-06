@@ -149,13 +149,17 @@ def devices(current_user):
                 new_alias = Alias(
                     name=alias['alias'],
                     unit_id=alias['unit']['id'],
-                    #TODO: ver si es de unit o de alias en el JSON en DeviceForm.vue
                     max_limit=alias['max_limit'], 
                     min_limit=alias['min_limit']
                     )
                 new_device.aliases.append(new_alias)
             db.session.commit()
             return jsonify({'msg': 'success'}),200
+        else:
+            return jsonify({
+                'error':True, 
+                'msg':'Ya existe un dispositivo con este identificadr unico.'
+                }), 409
     else:
         user = User.query.get(request.args.get('user'))
         if 'administrador' in user.role.name:
@@ -173,26 +177,32 @@ def device(current_user,id):
     device = Device.query.filter_by(id=id).first()
     if request.method == 'PUT':
         data = request.get_json()
-        device.name = data['name']
-        device.unic_id = data['unic_id']
-        device.place_id = data['place']
+        if Device.query.filter((Device.unic_id == data.get('unic_id')) & (Device.id != device.id) ).first() is None:
+            device.name = data['name']
+            device.unic_id = data['unic_id']
+            device.place_id = data['place']
         
-        if 'deletedItems' in data:
-            for alias in data['deletedItems']:
-                alias_to_delete = Alias.query.get(alias['id'])
-                db.session.delete(alias_to_delete)
+            if 'deletedItems' in data:
+                for alias in data['deletedItems']:
+                    alias_to_delete = Alias.query.get(alias['id'])
+                    db.session.delete(alias_to_delete)
 
-        for alias in data['aliases']:
-            if not 'id' in alias:
-                new_alias = Alias(
-                    name=alias['alias'],
-                    unit_id=alias['unit']['id'] if ('id' in alias['unit']) else alias['unit_id'],
-                    max_limit=alias['max_limit'], 
-                    min_limit=alias['min_limit']
-                    )
-                device.aliases.append(new_alias)            
-        db.session.commit()
-        return jsonify({'msg':'success'}), 200
+            for alias in data['aliases']:
+                if not 'id' in alias:
+                    new_alias = Alias(
+                        name=alias['alias'],
+                        unit_id=alias['unit']['id'] if ('id' in alias['unit']) else alias['unit_id'],
+                        max_limit=alias['max_limit'], 
+                        min_limit=alias['min_limit']
+                        )
+                    device.aliases.append(new_alias)            
+            db.session.commit()
+            return jsonify({'msg':'success'}), 201
+        else:
+            return jsonify({
+                'error':True, 
+                'msg':'Ya existe un dispositivo con este identificadr unico.'
+                }), 409
     
     elif request.method == 'DELETE':
         for alias in device.aliases:
@@ -226,7 +236,7 @@ def dump_data(current_user,device_id):
                     'measurements': [],
                     'name': None
                 })
-    return jsonify({}),401
+    return jsonify({'error':True, 'msg':'Algo salió mal'}),500
 
 @api.route('/users', methods=['GET','POST'])
 @token_required
@@ -296,7 +306,6 @@ def user(current_user, id):
 def get_pending_registrations(current_user):
     pending = Pending_registration.query.filter_by(user_id=current_user.id).first()
     if pending is not None:
-        print(pending)
         return jsonify({
             "is_pending":True,
             "telegram_id": pending.telegram_id
