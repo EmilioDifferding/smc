@@ -6,14 +6,14 @@
           <h1 class="card-header-title is-centered title">Inicio de sesion</h1>
         </div>
         <div class="card-content">
-          <form action="#" @submit.prevent="onSubmit">
+          <form action="#" @submit.prevent="onSubmit()">
             <b-field label="Email" label-position="on-border" label-for="email">
-              <b-input v-model="formData.email" type="email" id="email" name="email"></b-input>
+              <b-input v-model="formData.email" type="email" id="email" name="email" required></b-input>
             </b-field>
             <b-field label-position="on-border" label="Contraseña" label-for="password">
-              <b-input v-model="formData.password" type="password" name="password" id="password"></b-input>
+              <b-input v-model="formData.password" type="password" name="password" id="password" required></b-input>
             </b-field>
-            <b-button type="is-success submit" expanded @click="onSubmit()">Iniciar</b-button>
+            <b-button type="is-success submit" expanded @click.prevent="onSubmit()">Iniciar</b-button>
           </form>
         </div>
       </div>
@@ -47,7 +47,10 @@ export default {
         await this.signIn(this.formData)
         await this.$router.replace({name:'devices'})
       }catch(error){
-        console.error(error)
+        this.$buefy.toast.open({
+              message: `<strong class="has-text-light">${error.msg}</strong> <br> Verifica email o contraseña`,
+              type: "is-danger"
+            });
       }
     }
   },
