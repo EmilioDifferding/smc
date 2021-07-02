@@ -11,7 +11,7 @@
               <b-input v-model="formData.email" type="email" id="email" name="email" required></b-input>
             </b-field>
             <b-field label-position="on-border" label="Contraseña" label-for="password">
-              <b-input v-model="formData.password" type="password" name="password" id="password" required></b-input>
+              <b-input v-model="formData.password" type="password" name="password" id="password" required password-reveal></b-input>
             </b-field>
             <b-button type="is-success submit" expanded @click.prevent="onSubmit()">Iniciar</b-button>
           </form>
