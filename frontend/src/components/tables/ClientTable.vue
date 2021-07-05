@@ -103,14 +103,8 @@ export default {
         rows() {
             // footer
             let obj = {};
-            // for (let i = 0; i < this.columns.length; i++) {
-            // //     let matched = this.data.footers.find( obj => obj.field === this.columns[i].field );
-            // //     obj[this.columns[i].field] = matched? matched.value: null;
-                
-            // }
-            // // rows
+            
             obj.children = this.data.rows;
-            console.log(obj)
             return [obj];
             // return this.data.rows
         },

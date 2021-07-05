@@ -7,7 +7,7 @@
         </router-link>
       </template>
 
-      <b-table :data="table.rows">
+      <!-- <b-table :data="table.rows">
         <b-table-column field="id" label="ID" v-slot="props">
           {{ props.row.id }}
         </b-table-column>
@@ -39,12 +39,17 @@
           :is-full-page="false"
           v-model="isLoading"
         ></b-loading>
-      </b-table>
+      </b-table> -->
+      <client-table 
+        :data='table'
+        @delete='onDelete'
+      ></client-table>
     </portlet-base>
   </div>
 </template>
 
 <script>
+import ClientTable from '../../components/tables/ClientTable.vue';
 import CreateButton from "../../components/buttons/CreateButton";
 import PortletBase from "../../components/portlets/PortletBase";
 import { apiFactory } from "../../api/apiFactory";
@@ -52,27 +57,49 @@ const placesApi = apiFactory.get("places");
 export default {
   name: "PlacesList",
   components: {
+    ClientTable,
     CreateButton,
     PortletBase
   },
-  computed: {
-    table() {
-      return {
-        rows: this.places.map(obj => {
-          let props = this.$router.resolve({
-            name: "places.edit",
-            params: { id: obj.id }
-          });
-          obj.to = props;
-          return obj;
-        })
-      };
-    }
-  },
+  // computed: {
+  //   table() {
+  //     return {
+  //       rows: this.places.map(obj => {
+  //         let props = this.$router.resolve({
+  //           name: "places.edit",
+  //           params: { id: obj.id }
+  //         });
+  //         obj.to = props;
+  //         return obj;
+  //       })
+  //     };
+  //   }
+  // },
   data() {
     return {
       isLoading: false,
-      places: []
+      places: [],
+      table:{
+        rows:[],
+        columns:[
+          {
+            label: "Id",
+            field: "id",
+            type: "number"
+          },
+          {
+            label: "Nombre",
+            field: "name",
+          },
+          {
+            label: "Acciones",
+            field: "actions",
+            type: "actions",
+            sortable:false,
+            html: true
+          }
+        ]
+      }
     };
   },
   methods: {
@@ -81,6 +108,7 @@ export default {
       try {
         const data = await placesApi.get(localStorage.getItem('token'));
         this.places = data["places"];
+        this.table.rows = this.mapTableRows(this.places)
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
@@ -90,7 +118,23 @@ export default {
         });
       }
     },
-
+    mapTableRows(data){
+      return data.map(obj => {
+        let props = this.$router.resolve({
+          name:'places.edit',
+          params:{id:obj.id}
+        });
+        obj.actions = {
+          edit:{
+            url: props.href
+          },
+          delete:{
+            url:'#'
+          }
+        }
+        return obj;
+      })
+    },
     async onDelete(id) {
       this.$buefy.dialog.confirm({
         message: `Seguro que quiere borrar este elemento?`,

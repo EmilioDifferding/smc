@@ -7,7 +7,7 @@
         </router-link>
       </template>
 
-      <b-table :data="table.rows">
+      <!-- <b-table :data="table.rows">
         <b-table-column field="id" label="ID" v-slot="props">
           {{ props.row.id }}
         </b-table-column>
@@ -42,7 +42,11 @@
           :is-full-page="false"
           v-model="isLoading"
         ></b-loading>
-      </b-table>
+      </b-table> -->
+      <client-table
+        :data="table"
+        @delete='onDelete'
+      ></client-table>
     </portlet-base>
   </div>
 </template>
@@ -51,11 +55,13 @@
 import CreateButton from "../../components/buttons/CreateButton.vue";
 import PortletBase from "../../components/portlets/PortletBase.vue";
 import { apiFactory } from "../../api/apiFactory";
+import ClientTable from '../../components/tables/ClientTable.vue';
 const unitsApi = apiFactory.get("units");
 
 export default {
   name: "UnitsList",
   components: {
+    ClientTable,
     PortletBase,
     CreateButton,
   },
@@ -63,28 +69,41 @@ export default {
     return {
       isLoading: false,
       units: [],
+      table: {
+        rows:[],
+        columns:[
+          {
+            label: "Id",
+            field: "id",
+            type: "number"
+          },
+          {
+            label: "Nombre",
+            field: "name",
+          },
+          {
+            label:'Simbolo',
+            field:'symbol',
+          },
+          {
+            label: "Acciones",
+            field: "actions",
+            type: "actions",
+            sortable:false,
+            html: true
+          }
+        ],
+      }
     };
   },
-  computed: {
-    table() {
-      return {
-        rows: this.units.map((obj) => {
-          let props = this.$router.resolve({
-            name: "units.edit",
-            params: { id: obj.id },
-          });
-          obj.to = props;
-          return obj;
-        }),
-      };
-    },
-  },
+
   methods: {
     async fetchTableData() {
       this.isLoading = true;
       try {
         const data = await unitsApi.get();
         this.units = data['units'];
+        this.table.rows = this.mapTableRows(this.units)
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
@@ -93,6 +112,23 @@ export default {
           type: "is-danger",
         });
       }
+    },
+    mapTableRows(data){
+      return data.map(obj => {
+        let props = this.$router.resolve({
+          name:'places.edit',
+          params:{id:obj.id}
+        });
+        obj.actions = {
+          edit:{
+            url: props.href
+          },
+          delete:{
+            url:'#'
+          }
+        }
+        return obj;
+      })
     },
     async onDelete(id) {
       this.$buefy.dialog.confirm({

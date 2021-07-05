@@ -1,6 +1,6 @@
 <template>
   <portlet-base title="Usuarios" subtitle="Crear">
-    <users-form ref="form"></users-form>
+    <users-form ref="form"  @onEnter="logEvent"></users-form>
     <template v-slot:action-footer>
       <b-button
         type="is-success"
@@ -26,6 +26,9 @@ export default {
     UsersForm
   },
   methods:{
+    logEvent(e){
+      console.log('ENETR PRESSED', e)
+    },
     async onSubmit() {
       try {
         let formData = this.$refs.form.form;
