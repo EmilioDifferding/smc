@@ -22,35 +22,8 @@ export default {
   name: "DataList",
   computed:{
     aliasesColumns(){
-      // header columns rendering dinamically based on the aliases given
-      if (this.device.data.length > 0){
-        this.device.data[0].values.forEach((key, value) => {
-          let new_column = {
-            field: key.alias,
-            label: key.alias,
-          }
-          this.columns.push(new_column)
-          this.table.columns.push(new_column)
-        });
-      }
-      return true
-    },
-  },
-  data() {
-    return {
-      isPaginated:true,
-      isPaginationSimple:true,
-      perPage:10,
-      columns: [
-        
-      ],
-      device: {
-        data: [],
-      },
-      table:{
-        rows:[],
-        columns:[
-          {
+      let columns = [
+        {
           field: "id",
           label: "ID",
           numeric: true,
@@ -62,7 +35,35 @@ export default {
           label: "Fecha/Hora",
           sortable: true,
         },
-        ]
+      ];
+      // header columns rendering dinamically based on the aliases given
+      if (this.device.data.length > 0){
+        this.device.data[0].values.forEach((key, value) => {
+          let new_column = {
+            field: key.alias,
+            label: key.alias,
+          }
+          columns.push(new_column)
+          console.log(columns)
+        });
+      }
+      // this.table.columns = this.columns//.push(new_column)
+      // return true
+      return columns
+    },
+  },
+  data() {
+    return {
+      isPaginated:true,
+      isPaginationSimple:true,
+      perPage:10,
+      
+      device: {
+        data: [],
+      },
+      table:{
+        rows:[],
+        columns:[]
       }
     };
   },
@@ -76,6 +77,7 @@ export default {
         });
         this.device.data = data.measurements;
         this.table.rows = data.measurements
+        this.table.columns = this.aliasesColumns;
         this.device.name = data.name
         
       } catch (error) {
