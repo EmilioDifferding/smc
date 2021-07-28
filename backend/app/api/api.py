@@ -59,11 +59,17 @@ def places(current_user):
     
     elif request.method == 'POST':
         data = request.get_json()
-        place = Place(name=data['name'])
-        db.session.add(place)
-        db.session.commit()
-        return jsonify(place.to_dict()),201
-
+        if Place.query.filter_by(name=data.get('name') ).first() is None:
+            print(data['name'])
+            place = Place(name=data['name'])
+            db.session.add(place)
+            db.session.commit()
+            return jsonify(place.to_dict()),201
+        else:
+            return jsonify({
+                'error':True,
+                'msg':'El recinto ya existe.'
+            }),409
 
 @api.route('/places/<int:id>', methods=('GET', 'PUT', 'DELETE'))
 @token_required
@@ -74,9 +80,12 @@ def place(current_user,id):
     elif request.method == 'PUT':
         data = request.get_json()
         place = Place.query.get(id)
-        place.name = data['name']
-        db.session.commit()
-        return jsonify ({'msg': 'success'}), 201
+        if Place.query.filter((Place.name == data.get('name')) & (Place.id != place.id)).first() is None:
+            place.name = data['name']
+            db.session.commit()
+            return jsonify ({'msg': 'success'}), 201
+        else:
+            return jsonify({'error': True, 'msg': 'ya existe un recinto con este nombre'}), 409
     elif request.method == 'DELETE':
         place = Place.query.get(id)
         db.session.delete(place)
@@ -91,25 +100,31 @@ def units(current_user):
         return jsonify({'units':[u.to_dict() for u in units]})
     elif request.method == 'POST':
         data = request.get_json()
-        new_unit = Unit(
-            name=data['name'],
-            symbol=data['symbol']
-        )
-        db.session.add(new_unit)
-        db.session.commit()
-        return jsonify ({'msg': 'success'}), 201
+        if Unit.query.filter_by(name=data.get('name')).first() is None:
+            new_unit = Unit(
+                name=data['name'],
+                symbol=data['symbol']
+            )
+            db.session.add(new_unit)
+            db.session.commit()
+            return jsonify ({'msg': 'success'}), 201
+        else:
+            return jsonify({'error':True, 'msg':'Ya existe una unidad con este nombre.'}), 409
 
 @api.route('/units/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @token_required
 def unit(current_user,id):
-    unit = Unit.query.filter_by(id=id).first_or_404()
+    unit = Unit.query.filter_by(id=id).first()
     
     if request.method == 'PUT':
         data = request.get_json()
-        unit.name = data['name']
-        unit.symbol = data['symbol']
-        db.session.commit()
-        return jsonify ({'msg': 'success'}), 200
+        if Unit.query.filter((Unit.name == data.get('name')) & (Unit.id != unit.id) ).first() is None:
+            unit.name = data['name']
+            unit.symbol = data['symbol']
+            db.session.commit()
+            return jsonify ({'msg': 'success'}), 200
+        else:
+            return jsonify({'error':True, 'msg':'Ya existe una unidad con este nombre.'}), 409
     elif request.method == 'DELETE':
         db.session.delete(unit)
         db.session.commit()
@@ -134,13 +149,17 @@ def devices(current_user):
                 new_alias = Alias(
                     name=alias['alias'],
                     unit_id=alias['unit']['id'],
-                    #TODO: ver si es de unit o de alias en el JSON en DeviceForm.vue
                     max_limit=alias['max_limit'], 
                     min_limit=alias['min_limit']
                     )
                 new_device.aliases.append(new_alias)
             db.session.commit()
             return jsonify({'msg': 'success'}),200
+        else:
+            return jsonify({
+                'error':True, 
+                'msg':'Ya existe un dispositivo con este identificadr unico.'
+                }), 409
     else:
         user = User.query.get(request.args.get('user'))
         if 'administrador' in user.role.name:
@@ -158,26 +177,32 @@ def device(current_user,id):
     device = Device.query.filter_by(id=id).first()
     if request.method == 'PUT':
         data = request.get_json()
-        device.name = data['name']
-        device.unic_id = data['unic_id']
-        device.place_id = data['place']
+        if Device.query.filter((Device.unic_id == data.get('unic_id')) & (Device.id != device.id) ).first() is None:
+            device.name = data['name']
+            device.unic_id = data['unic_id']
+            device.place_id = data['place']
         
-        if 'deletedItems' in data:
-            for alias in data['deletedItems']:
-                alias_to_delete = Alias.query.get(alias['id'])
-                db.session.delete(alias_to_delete)
+            if 'deletedItems' in data:
+                for alias in data['deletedItems']:
+                    alias_to_delete = Alias.query.get(alias['id'])
+                    db.session.delete(alias_to_delete)
 
-        for alias in data['aliases']:
-            if not 'id' in alias:
-                new_alias = Alias(
-                    name=alias['alias'],
-                    unit_id=alias['unit']['id'] if ('id' in alias['unit']) else alias['unit_id'],
-                    max_limit=alias['max_limit'], 
-                    min_limit=alias['min_limit']
-                    )
-                device.aliases.append(new_alias)            
-        db.session.commit()
-        return jsonify({'msg':'success'}), 200
+            for alias in data['aliases']:
+                if not 'id' in alias:
+                    new_alias = Alias(
+                        name=alias['alias'],
+                        unit_id=alias['unit']['id'] if ('id' in alias['unit']) else alias['unit_id'],
+                        max_limit=alias['max_limit'], 
+                        min_limit=alias['min_limit']
+                        )
+                    device.aliases.append(new_alias)            
+            db.session.commit()
+            return jsonify({'msg':'success'}), 201
+        else:
+            return jsonify({
+                'error':True, 
+                'msg':'Ya existe un dispositivo con este identificadr unico.'
+                }), 409
     
     elif request.method == 'DELETE':
         for alias in device.aliases:
@@ -211,7 +236,7 @@ def dump_data(current_user,device_id):
                     'measurements': [],
                     'name': None
                 })
-    return jsonify({}),401
+    return jsonify({'error':True, 'msg':'Algo salió mal'}),500
 
 @api.route('/users', methods=['GET','POST'])
 @token_required
@@ -239,32 +264,40 @@ def user(current_user, id):
     user = User.query.filter_by(id=id).first()
     if request.method == 'PUT':
         data = request.get_json()
-        user.name = data['name']
-        user.email=data['email']
-        user.role_id=data['role']
-        user.devices=[]
-        for device in data['devices']:
-            d = Device.query.filter_by(id=device['id']).first()
-            if user.devices:
-                for user_device in user.devices:
-                    if d.id != user_device.id:
-                        user.devices.append(d) 
+        try:
+            user.name = data['name']
+            user.email=data['email']
+            user.role_id=data['role']
+            user.devices=[]
+            for device in data['devices']:
+                d = Device.query.filter_by(id=device['id']).first()
+                if user.devices:
+                    for user_device in user.devices:
+                        if d.id != user_device.id:
+                            user.devices.append(d) 
+                else:
+                    user.devices.append(d)
+            tele_id = data.get('telegram_id')
+            if tele_id:
+                user.telegram_id = tele_id
             else:
-                user.devices.append(d)
-        tele_id = data.get('telegram_id')
-        if tele_id:
-            user.telegram_id = tele_id
-        else:
-            user.telegram_id = None
-            
-        if 'password' in data:
-            user.__init__(name=data['name'],email=data['email'],password=data['password'], role=data['role'])
-        db.session.commit()
-        return jsonify(user.to_dict()),201
+                user.telegram_id = None
+                
+            if 'password' in data:
+                user.__init__(name=data['name'],email=data['email'],password=data['password'], role=data['role'])
+            db.session.commit()
+            return jsonify(user.to_dict()),201
+        
+        except Exception:
+            return jsonify({
+                'error': True,
+                'msg': 'Ya se ha registrado un usuario con este correo.'
+            }), 409
     elif request.method == 'DELETE':
-        db.session.delete(user)
-        db.session.commit()
-        return jsonify({'msg':'success'}), 200
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({'msg':'success'}), 200
+        
     else:
         return jsonify(user.to_dict())
 
@@ -273,7 +306,6 @@ def user(current_user, id):
 def get_pending_registrations(current_user):
     pending = Pending_registration.query.filter_by(user_id=current_user.id).first()
     if pending is not None:
-        print(pending)
         return jsonify({
             "is_pending":True,
             "telegram_id": pending.telegram_id

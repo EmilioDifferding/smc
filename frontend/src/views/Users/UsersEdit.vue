@@ -46,16 +46,17 @@ export default {
     async onSubmit() {
       try {
         let formData = this.$refs.form.form;
-        await usersApi.update(this.$route.params.id, formData);
+        let response = await usersApi.update(this.$route.params.id, formData);
         this.$buefy.toast.open({
           message: `Operación Realizada`,
           type: "is-success"
         });
         this.$router.push({ name: "users" });
       } catch (error) {
+        console.log("ERROR")
         console.log(error);
         this.$buefy.toast.open({
-          message: `Algo salio mal ${error}`,
+          message: `${error.title} <br> ${error.content}`,
           type: "is-danger"
         });
       }

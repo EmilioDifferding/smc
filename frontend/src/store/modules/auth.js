@@ -48,7 +48,8 @@ export default {
                 if (error.response) {
                     commit('SET_USER', null)
                     commit('SET_TOKEN', '')
-                    console.error(error.response)
+                    // console.error(error.response.data)
+                    throw error.response.data
                 }
             }
         },

@@ -1,38 +1,41 @@
 <template>
   <div class="container">
     <portlet-base title="Datos de dispositivo" :subtitle="device.name ? device.name : null">
-      <b-select
-        v-model="perPage"
-      >
-      <option value="10" >10 por página</option>
-      <option value="50">50 por página</option>
-      <option value="100">100 por página</option>
-      </b-select>
-      <b-table 
-        v-if="aliasesColumns" 
-        :data="device.data" 
-        :columns="columns"
-        :per-page="perPage"
-        :paginated="isPaginated"
-        pagination-position="top"
-        default-sort="id"
-        sort-icon="arrow-down"
-        default-sort-direction="desc"
-      > </b-table>
-      <p v-if="!device.data.length">No data yet</p>
+     
+      <client-table
+        :data="table"
+      ></client-table>
     </portlet-base>
   </div>
 </template>
 
 <script>
+import ClientTable from '../../components/tables/ClientTable.vue'
 import PortletBase from "../../components/portlets/PortletBase.vue";
 import { apiFactory } from "../../api/apiFactory";
 const devicesApi = apiFactory.get("devices");
 export default {
-  components: { PortletBase },
+  components: { 
+    PortletBase,
+    ClientTable,
+    },
   name: "DataList",
   computed:{
     aliasesColumns(){
+      let columns = [
+        {
+          field: "id",
+          label: "ID",
+          numeric: true,
+          sortable: true,
+          firstSortType: 'desc'
+        },
+        {
+          field: "timestamp",
+          label: "Fecha/Hora",
+          sortable: true,
+        },
+      ];
       // header columns rendering dinamically based on the aliases given
       if (this.device.data.length > 0){
         this.device.data[0].values.forEach((key, value) => {
@@ -40,10 +43,13 @@ export default {
             field: key.alias,
             label: key.alias,
           }
-          this.columns.push(new_column)
+          columns.push(new_column)
+          console.log(columns)
         });
       }
-      return true
+      // this.table.columns = this.columns//.push(new_column)
+      // return true
+      return columns
     },
   },
   data() {
@@ -51,22 +57,14 @@ export default {
       isPaginated:true,
       isPaginationSimple:true,
       perPage:10,
-      columns: [
-        {
-          field: "id",
-          label: "ID",
-          numeric: true,
-          sortable: true,
-        },
-        {
-          field: "timestamp",
-          label: "Fecha/Hora",
-          sortable: true,
-        },
-      ],
+      
       device: {
         data: [],
       },
+      table:{
+        rows:[],
+        columns:[]
+      }
     };
   },
   methods: {
@@ -78,6 +76,8 @@ export default {
           obj.values.forEach(v =>{obj[`${v.alias}`] = v.value})
         });
         this.device.data = data.measurements;
+        this.table.rows = data.measurements
+        this.table.columns = this.aliasesColumns;
         this.device.name = data.name
         
       } catch (error) {

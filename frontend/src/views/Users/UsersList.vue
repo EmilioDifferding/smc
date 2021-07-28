@@ -6,7 +6,7 @@
           <create-button></create-button>
         </router-link>
       </template>
-      <b-table :data="table.rows">
+      <!-- <b-table :data="table.rows">
         <b-table-column field="id" label="Id" v-slot="props">
           {{ props.row.id }}
         </b-table-column>
@@ -44,12 +44,14 @@
           :is-full-page="false"
           v-model="isLoading"
         ></b-loading>
-      </b-table>
+      </b-table> -->
+      <client-table :data="table" :rows='table.rows' @delete="onDelete"></client-table>
     </portlet-base>
   </div>
 </template>
 
 <script>
+import ClientTable from "../../components/tables/ClientTable.vue";
 import { mapGetters } from "vuex";
 import PortletBase from "../../components/portlets/PortletBase";
 import CreateButton from "../../components/buttons/CreateButton";
@@ -60,32 +62,50 @@ export default {
   name: "UsersList",
   components: {
     PortletBase,
-    CreateButton
+    CreateButton,
+    ClientTable
   },
   data() {
     return {
       isLoading: false,
-      users: []
+      users: [],
+      table: {
+        columns: [
+          {
+            field: "id",
+            label: "Id",
+            type:'number',
+          },
+          {
+            field: "name",
+            label: "Nombre"
+          },
+          {
+            field: "email",
+            label: "Email",
+          },
+          {
+            field: 'role.name',
+            label: 'Rol'
+          },
+          {
+            field: "actions",
+            label: "Acciones",
+            type:'actions',
+            sortable:false,
+            html:true,
+          }
+        ],
+        rows: []
+      }
     };
   },
   computed: {
     ...mapGetters({
-      user: 'auth/user'
+      user: "auth/user"
     }),
-     role(){
-      return this.user? this.user.role.name: null
-    },
-    table() {
-      return {
-        rows: this.users.map(obj => {
-          let props = this.$router.resolve({
-            name: "users.edit",
-            params: { id: obj.id }
-          });
-          obj.to = props;
-          return obj;
-        })
-      };
+    role() {
+      return this.user ? this.user.role.name : null;
     }
   },
   methods: {
@@ -94,11 +114,30 @@ export default {
       try {
         let users = await usersApi.get();
         this.users = users.users;
+        this.table.rows = this.mapTableRows(this.users)
         this.isLoading = false;
       } catch (error) {
         console.log(error);
         this.isLoading = false;
       }
+    },
+    mapTableRows(data) {
+      return data.map(obj => {
+        let props = this.$router.resolve({
+          name: "users.edit",
+          params: { id: obj.id }
+        });
+        obj.actions = {
+          edit: {
+            url: props.href
+          },
+          delete: {
+            url: "#"
+          }
+        };
+        // obj.actions = `<h2>Hola</h2>`
+        return obj;
+      });
     },
     async onDelete(id) {
       this.$buefy.dialog.confirm({
