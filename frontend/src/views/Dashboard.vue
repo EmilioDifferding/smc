@@ -1,20 +1,42 @@
 <template>
+  <div>
+    <div class="mobile-header p-2 pl-6 has-background-light">
+      <div class="level is-mobile">
+        <div class="level-left">
+          <div class="level-item">
+            <h1 class="title"><a href="/dispositivos"> SMC FCAL </a></h1>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <b-button @click="open = !open"><b-icon icon='menu'></b-icon></b-button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="sidebar-page">
-      <section class="sidebar-layout">
+      <section class="sidebar-layout is-flex">
         <b-sidebar
-          position="static"
+          position="fixed"
           :mobile="mobile"
-          :reduce="reduce"
+          fullheight
           type="is-light"
-          open
+          v-model="open"
+          can-cancel
         >
-          <div class="p-1 full-height">
+          <div class="p-1 full-height" >
             <div class="block">
-              <h1 class="title">SMC FCAL</h1>
+              <div class="level is-mobile hide-on-mobile">
+                <div class="level-left"></div>
+                <div class="level-right">
+                  <div @click="open = !open"  class="level-item"><b-button  type="is-info"><b-icon icon="window-close" ></b-icon></b-button></div>
+                </div>
+              </div>
+              <h1 class="title is-4">Menú</h1>
             </div>
             <div class="container">
 
-              <div class="level">
+              <div class="level is-mobile">
                 <div class="level-left">
                   <h3 class="subtitle is-inline-flex"> <b-icon icon="account"></b-icon>  {{user.name}}</h3>
                 </div>
@@ -27,7 +49,7 @@
               <registration-button></registration-button>
             </div>
             <hr>
-            <b-menu class="is-custom-mobile" :activable="false">
+            <b-menu class="is-custom-mobile" :activable="activable">
               <b-menu-list>
                 <b-menu-item
                   :to="{name:'devices'}"
@@ -35,7 +57,7 @@
                   icon="memory"
                   label="Dispositivos"
                 ></b-menu-item>
-                <b-menu-item v-if="['administrador'].includes(role)"
+                <b-menu-item  v-if="['administrador'].includes(role)"
                   :to="{name:'users'}"
                   tag="router-link"
                   icon="account"
@@ -64,6 +86,8 @@
         </div>
       </section>
     </div>
+    <!-- <sidebar></sidebar> -->
+  </div>
 </template>
 
 <script>
@@ -74,17 +98,18 @@ const usersApi = apiFactory.get('users')
 export default {
   name:'Dashboard',
   components:{
-    RegistrationButton
+    RegistrationButton,
   },
   data() {
     return {
       expanOnHover: false,
-      mobile: "reduced",
+      mobile: "fullwidth",
       reduce: false,
       activable: false,
       active:false,
       hasPendings:false,
       regData:{},
+      open: false,
     };
   },
   methods:{
@@ -130,89 +155,93 @@ export default {
   padding: 1em;
 }
 .full-height{
-  height: 100vh;
-  // background-color: green;
-}
-.sidebar-page {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  // min-height: 100%;
   min-height: 100vh;
-  .sidebar-layout {
-    display: flex;
-    flex-direction: row;
-    background-color: #fff;
-    min-height: 100vh;
-  }
 }
-@media screen and (max-width: 1023px) {
-  .b-sidebar {
-    .sidebar-content {
-      &.is-mini-mobile {
-        &:not(.is-mini-expand),
-        &.is-mini-expand:not(:hover) {
-          .menu-list {
-            li {
-              a {
-                span:nth-child(2) {
-                  display: none;
-                }
-              }
-              ul {
-                padding-left: 0;
-                li {
-                  a {
-                    display: inline-block;
-                  }
-                }
-              }
-            }
-          }
-          .menu-label:not(:last-child) {
-            margin-bottom: 0;
-          }
-        }
-      }
-    }
-  }
-}
-@media screen and (min-width: 1024px) {
-  .b-sidebar {
-    .sidebar-content {
-      &.is-mini {
-        &:not(.is-mini-expand),
-        &.is-mini-expand:not(:hover) {
-          .menu-list {
-            li {
-              a {
-                span:nth-child(2) {
-                  display: none;
-                }
-              }
-              ul {
-                padding-left: 0;
-                li {
-                  a {
-                    display: inline-block;
-                  }
-                }
-              }
-            }
-          }
-          .menu-label:not(:last-child) {
-            margin-bottom: 0;
-          }
-        }
-      }
-    }
-  }
-}
-.is-mini-expand {
-  .menu-list a {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+// .sidebar-page {
+//   display: flex;
+//   flex-direction: column;
+//   width: 100%;
+//   // min-height: 100%;
+//   min-height: 100vh;
+//   .sidebar-layout {
+//     display: flex;
+//     flex-direction: row;
+//     background-color: #fff;
+//     min-height: 100vh;
+//   }
+// }
+// @media screen and (max-width: 1023px) {
+//   .b-sidebar {
+//     .sidebar-content {
+//       &.is-mini-mobile {
+//         &:not(.is-mini-expand),
+//         &.is-mini-expand:not(:hover) {
+//           .menu-list {
+//             li {
+//               a {
+//                 span:nth-child(2) {
+//                   display: none;
+//                 }
+//               }
+//               ul {
+//                 padding-left: 0;
+//                 li {
+//                   a {
+//                     display: inline-block;
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//           .menu-label:not(:last-child) {
+//             margin-bottom: 0;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+// @media screen and (min-width: 1024px) {
+//   .b-sidebar {
+//     .sidebar-content {
+//       &.is-mini {
+//         &:not(.is-mini-expand),
+//         &.is-mini-expand:not(:hover) {
+//           .menu-list {
+//             li {
+//               a {
+//                 span:nth-child(2) {
+//                   display: none;
+//                 }
+//               }
+//               ul {
+//                 padding-left: 0;
+//                 li {
+//                   a {
+//                     display: inline-block;
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//           .menu-label:not(:last-child) {
+//             margin-bottom: 0;
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+// .is-mini-expand {
+//   .menu-list a {
+//     white-space: nowrap;
+//     overflow: hidden;
+//     text-overflow: ellipsis;
+//   }
+// }
+@media screen and (min-width: 1024px){
+  .hide-on-mobile{
+    display: none;
   }
 }
 </style>
