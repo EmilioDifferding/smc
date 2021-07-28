@@ -51,6 +51,7 @@
         :data="devices"
         :columns="table.columns"
         :checked-rows.sync="checkedDevices"
+        :mobile-cards="false"
         checkable
       >
       </b-table>
