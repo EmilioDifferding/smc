@@ -2,7 +2,7 @@
   <div class="container">
     <portlet-base title="Dispositivos" subtitle="Listado">
       <template slot="head-actions" v-if="['administrador'].includes(role)">
-        <router-link to="crear">
+        <router-link :to="{name: 'devices.create'}">
           <create-button> </create-button>
         </router-link>
       </template>

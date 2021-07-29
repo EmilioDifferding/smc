@@ -14,10 +14,10 @@
         </div>
       </div>
     </div>
-    <div class="sidebar-page">
-      <section class="sidebar-layout is-flex">
+    <div class="sidebar-page is-flex">
+      <section class="sidebar-layout">
         <b-sidebar
-          position="fixed"
+          :position="position"
           :mobile="mobile"
           fullheight
           type="is-light"
@@ -102,6 +102,7 @@ export default {
   },
   data() {
     return {
+      position:'static',
       expanOnHover: false,
       mobile: "fullwidth",
       reduce: false,
@@ -146,8 +147,11 @@ export default {
   mounted(){
     this.checkPendings()
   }
+  
  
 };
+let cosas = document.querySelector('.sidebar-page');
+console.log(cosas);
 </script>
 
 <style lang="scss" scoped>
@@ -157,88 +161,88 @@ export default {
 .full-height{
   min-height: 100vh;
 }
-// .sidebar-page {
-//   display: flex;
-//   flex-direction: column;
-//   width: 100%;
-//   // min-height: 100%;
-//   min-height: 100vh;
-//   .sidebar-layout {
-//     display: flex;
-//     flex-direction: row;
-//     background-color: #fff;
-//     min-height: 100vh;
-//   }
-// }
-// @media screen and (max-width: 1023px) {
-//   .b-sidebar {
-//     .sidebar-content {
-//       &.is-mini-mobile {
-//         &:not(.is-mini-expand),
-//         &.is-mini-expand:not(:hover) {
-//           .menu-list {
-//             li {
-//               a {
-//                 span:nth-child(2) {
-//                   display: none;
-//                 }
-//               }
-//               ul {
-//                 padding-left: 0;
-//                 li {
-//                   a {
-//                     display: inline-block;
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//           .menu-label:not(:last-child) {
-//             margin-bottom: 0;
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
-// @media screen and (min-width: 1024px) {
-//   .b-sidebar {
-//     .sidebar-content {
-//       &.is-mini {
-//         &:not(.is-mini-expand),
-//         &.is-mini-expand:not(:hover) {
-//           .menu-list {
-//             li {
-//               a {
-//                 span:nth-child(2) {
-//                   display: none;
-//                 }
-//               }
-//               ul {
-//                 padding-left: 0;
-//                 li {
-//                   a {
-//                     display: inline-block;
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//           .menu-label:not(:last-child) {
-//             margin-bottom: 0;
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
-// .is-mini-expand {
-//   .menu-list a {
-//     white-space: nowrap;
-//     overflow: hidden;
-//     text-overflow: ellipsis;
-//   }
-// }
+.sidebar-page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  // min-height: 100%;
+  min-height: 100vh;
+  .sidebar-layout {
+    display: flex;
+    flex-direction: row;
+    background-color: #fff;
+    min-height: 100vh;
+  }
+}
+@media screen and (max-width: 1023px) {
+  .b-sidebar {
+    .sidebar-content {
+      &.is-mini-mobile {
+        &:not(.is-mini-expand),
+        &.is-mini-expand:not(:hover) {
+          .menu-list {
+            li {
+              a {
+                span:nth-child(2) {
+                  display: none;
+                }
+              }
+              ul {
+                padding-left: 0;
+                li {
+                  a {
+                    display: inline-block;
+                  }
+                }
+              }
+            }
+          }
+          .menu-label:not(:last-child) {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+@media screen and (min-width: 1024px) {
+  .b-sidebar {
+    .sidebar-content {
+      &.is-mini {
+        &:not(.is-mini-expand),
+        &.is-mini-expand:not(:hover) {
+          .menu-list {
+            li {
+              a {
+                span:nth-child(2) {
+                  display: none;
+                }
+              }
+              ul {
+                padding-left: 0;
+                li {
+                  a {
+                    display: inline-block;
+                  }
+                }
+              }
+            }
+          }
+          .menu-label:not(:last-child) {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+.is-mini-expand {
+  .menu-list a {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 @media screen and (min-width: 1024px){
   .hide-on-mobile{
     display: none;

@@ -80,7 +80,7 @@ export default [
                     },
                     {
                         path: 'crear',
-                        name: 'create',
+                        name: 'devices.create',
                         component: DeviceCreate,
                         meta:{
                             requiresPermissions: ['administrador']
