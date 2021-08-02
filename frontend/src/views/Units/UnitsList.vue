@@ -116,7 +116,7 @@ export default {
     mapTableRows(data){
       return data.map(obj => {
         let props = this.$router.resolve({
-          name:'places.edit',
+          name:'units.edit',
           params:{id:obj.id}
         });
         obj.actions = {
